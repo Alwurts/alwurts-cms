@@ -14,13 +14,16 @@ const buttonVariants = cva(
 				default:
 					"bg-primary-alwurts text-primary-foreground-alwurts hover:bg-primary-alwurts/90 rounded-full",
 				outline:
-					"border-[3px] border-input-alwurts font-bold bg-background-alwurts rounded-full hover:bg-accent-alwurts hover:text-accent-foreground-alwurts",
+					"border-[3px] border-input-alwurts font-bold bg-background-alwurts rounded-[100px] hover:bg-accent-alwurts hover:text-accent-foreground-alwurts",
+				ghost: "font-bold hover:bg-accent-alwurts hover:text-accent-foreground-alwurts",
+				link: "font-bold text-primary-alwurts underline-offset-4 hover:underline hover:text-accent-alwurts",
 			},
 			size: {
+        sm: "h-9 px-3 text-base",
 				default: "h-10 px-4 py-2 text-md",
-				sm: "h-9 px-3 text-base",
 				lg: "h-11 px-8 text-lg",
-				icon: "h-10 w-10",
+				xl: "h-14 px-10 text-xl",
+				icon: "h-16 w-16 p-2 border-[4px]",
 			},
 		},
 		defaultVariants: {
