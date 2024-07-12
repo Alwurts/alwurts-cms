@@ -30,7 +30,7 @@ export default async function Signin() {
 									variant: "default",
 									size: "lg",
 								})}
-								href="/app"
+								href="/editor"
 							>
 								Go to dashboard
 							</Link>
