@@ -19,9 +19,9 @@ interface EditorProps {
 export default function MDXEditor({ markdown, editorRef }: EditorProps) {
 	return (
 		<MDXEditorParent
-			onChange={(e) => console.log(e)}
 			ref={editorRef}
 			markdown={markdown}
+			className="border rounded-md"
 			plugins={[
         toolbarPlugin({
           toolbarContents: () => (

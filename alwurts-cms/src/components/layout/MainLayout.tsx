@@ -1,7 +1,3 @@
-import { PanelLeft } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import DynamicBreadcrumb from "@/components/breadcrumb/DynamicBreadcrumb";
 import { SidebarNavigation } from "@/components/layout/navigation/SidebarNavigation";
 import { MobileNavigation } from "@/components/layout/navigation/MobileNavigation";
