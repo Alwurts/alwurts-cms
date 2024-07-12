@@ -8,16 +8,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-/* import { auth } from "@/auth";
-import { signOutAuth } from "@/server-actions/auth"; */
+import { auth } from "@/auth";
+import { signOut } from "@/server-actions/auth";
 
 export async function UserActions() {
-	/* const authSession = await auth(); */
-	const authSession = {
-		user: {
-			image: "/placeholder-user.jpg",
-		},
-	};
+	const authSession = await auth();
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
@@ -40,8 +35,8 @@ export async function UserActions() {
 				<DropdownMenuSeparator />
 				<DropdownMenuItem>Settings</DropdownMenuItem>
 				<DropdownMenuSeparator />
-				{/* <DropdownMenuItem className="p-0" asChild>
-					<form className="w-full" action={signOutAuth}>
+				<DropdownMenuItem className="p-0" asChild>
+					<form className="w-full" action={signOut}>
 						<Button
 							className="w-full py-1 h-8 justify-start"
 							size="sm"
@@ -51,7 +46,7 @@ export async function UserActions() {
 							Logout
 						</Button>
 					</form>
-				</DropdownMenuItem> */}
+				</DropdownMenuItem>
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);
