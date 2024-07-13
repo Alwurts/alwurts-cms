@@ -1,6 +1,8 @@
 import { relations, sql } from "drizzle-orm";
 import {
 	boolean,
+	date,
+	foreignKey,
 	index,
 	integer,
 	pgTable,
@@ -17,13 +19,18 @@ export const postTags = pgTable("post_tags", {
 
 export const postTagsRelations = relations(postTags, ({ many }) => ({
 	posts: many(postsToTags),
+	postsVersions: many(postsVersionsToTags),
 }));
 
 export const postsToTags = pgTable(
 	"posts_to_tags",
 	{
-		postId: uuid("post_id").references(() => posts.id),
-		tagName: varchar("tag_name").references(() => postTags.name),
+		postId: uuid("post_id")
+			.references(() => posts.id)
+			.notNull(),
+		tagName: varchar("tag_name")
+			.references(() => postTags.name)
+			.notNull(),
 	},
 	(t) => ({
 		pk: primaryKey({ columns: [t.postId, t.tagName] }),
@@ -47,6 +54,7 @@ export const posts = pgTable("posts", {
 	description: varchar("description", { length: 255 }).notNull(),
 	content: text("content").notNull(),
 	author: varchar("author", { length: 255 }).notNull(),
+	date: date("date").notNull(),
 	isFeatured: boolean("is_featured").notNull().default(false),
 	isPublished: boolean("is_published").notNull().default(false),
 	createdAt: timestamp("created_at").notNull(),
@@ -69,6 +77,7 @@ export const postVersions = pgTable(
 		description: varchar("description", { length: 255 }).notNull(),
 		content: text("content").notNull(),
 		author: varchar("author", { length: 255 }).notNull(),
+		date: date("date").notNull(),
 		isFeatured: boolean("is_featured").notNull().default(false),
 		isPublished: boolean("is_published").notNull().default(false),
 		publishedAt: timestamp("published_at"),
@@ -83,9 +92,42 @@ export const postVersions = pgTable(
 	},
 );
 
-export const postVersionsRelations = relations(postVersions, ({ one }) => ({
-	post: one(posts, {
-		fields: [postVersions.postId],
-		references: [posts.id],
+export const postVersionsRelations = relations(
+	postVersions,
+	({ one, many }) => ({
+		post: one(posts, {
+			fields: [postVersions.postId],
+			references: [posts.id],
+		}),
+		tags: many(postsVersionsToTags),
 	}),
-}));
+);
+
+export const postsVersionsToTags = pgTable(
+	"posts_versions_to_tags",
+	{
+		postId: uuid("post_id").notNull(),
+		postVersion: integer("post_version").notNull(),
+		tagName: varchar("tag_name")
+			.references(() => postTags.name)
+			.notNull(),
+	},
+	(t) => ({
+		pk: primaryKey({ columns: [t.postId, t.postVersion, t.tagName] }),
+		postVersionReference: foreignKey({
+			columns: [t.postId, t.postVersion],
+			foreignColumns: [postVersions.postId, postVersions.postVersion],
+			name: "posts_versions_to_tags_post_version_fkey",
+		}),
+	}),
+);
+
+export const postsVersionsToTagsRelations = relations(
+	postsVersionsToTags,
+	({ one }) => ({
+		postVersion: one(postVersions, {
+			fields: [postsVersionsToTags.postId, postsVersionsToTags.postVersion],
+			references: [postVersions.postId, postVersions.postVersion],
+		}),
+	}),
+);

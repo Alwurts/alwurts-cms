@@ -21,13 +21,6 @@ import { useEffect, useState } from "react";
 export default function PostCard({ post }: { post: TPost }) {
 	const [activeTab, setActiveTab] = useState("current");
 	const [isExpanded, setIsExpanded] = useState(false);
-	const [mounted, setMounted] = useState(false);
-
-	useEffect(() => {
-		setMounted(true);
-	}, []);
-
-	if (!mounted) return <Skeleton className="w-full h-[300px]" />;
 
 	const truncatedContent =
 		post.content.slice(0, 150) + (post.content.length > 150 ? "..." : "");

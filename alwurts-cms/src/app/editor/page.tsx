@@ -1,6 +1,12 @@
 import { getPosts } from "@/server-actions/post";
-import PostCard from "./components/PostCard";
 import CreateButton from "./components/CreateButton";
+import dynamic from "next/dynamic";
+import { Skeleton } from "@/components/ui/skeleton";
+
+const PostCard = dynamic(() => import("./components/PostCard"), {
+	loading: () => <Skeleton className="w-full h-[300px]" />,
+	ssr: false,
+});
 
 export default async function CMSPostsPage() {
 	const posts = await getPosts();

@@ -3,7 +3,8 @@
 import { db } from "@/database";
 import * as postsProxy from "@/proxies/posts";
 import * as postsVersionsProxy from "@/proxies/postsVersions";
-import type { TCreatePost } from "@/types/database/post";
+import type { TUpdatePost } from "@/types/database/post";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export async function getPosts() {
@@ -29,6 +30,7 @@ export async function createPost() {
 			description: newPost.description,
 			content: newPost.content,
 			author: newPost.author,
+			tags: [],
 		});
 
 		return newPost;

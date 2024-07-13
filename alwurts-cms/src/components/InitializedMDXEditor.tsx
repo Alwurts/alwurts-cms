@@ -1,8 +1,8 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import {
-	MDXEditor as MDXEditorParent,
-	type MDXEditorMethods,
+	MDXEditor,
 	headingsPlugin,
 	toolbarPlugin,
 	UndoRedo,
@@ -23,29 +23,26 @@ import {
 	ListsToggle,
 	Separator,
 	linkDialogPlugin,
+	type MDXEditorMethods,
+	type MDXEditorProps,
 } from "@mdxeditor/editor";
-import "@mdxeditor/editor/style.css";
+import type { ForwardedRef } from "react";
 
-interface EditorProps {
-	markdown: string;
-	editorRef?: React.MutableRefObject<MDXEditorMethods | null>;
-}
-
-export default function MDXEditor({ markdown, editorRef }: EditorProps) {
+export default function InitializedMDXEditor({
+	editorRef,
+	...props
+}: { editorRef: ForwardedRef<MDXEditorMethods> | null } & MDXEditorProps) {
 	return (
-		<MDXEditorParent
-			ref={editorRef}
-			markdown={markdown}
-			className="border rounded-md"
+		<MDXEditor
 			plugins={[
 				headingsPlugin(),
-				codeBlockPlugin({ defaultCodeBlockLanguage: "js" }),
+				/* codeBlockPlugin({ defaultCodeBlockLanguage: "js" }),
 				linkPlugin(),
-				linkDialogPlugin(),
+				linkDialogPlugin(), */
 				quotePlugin(),
 				listsPlugin(),
 				thematicBreakPlugin(),
-				imagePlugin({
+				/* imagePlugin({
 					imageUploadHandler: () => {
 						return Promise.resolve("https://picsum.photos/200/300");
 					},
@@ -53,7 +50,7 @@ export default function MDXEditor({ markdown, editorRef }: EditorProps) {
 						"https://picsum.photos/200/300",
 						"https://picsum.photos/200",
 					],
-				}),
+				}), */
 				toolbarPlugin({
 					toolbarContents: () => (
 						<>
@@ -61,22 +58,26 @@ export default function MDXEditor({ markdown, editorRef }: EditorProps) {
 							<Separator />
 							<BoldItalicUnderlineToggles />
 							<Separator />
-							<CodeToggle />
-							<InsertThematicBreak />
+							{/* <CodeToggle />
+							<InsertThematicBreak /> */}
 							<BlockTypeSelect />
 							<Separator />
 							<ListsToggle />
-							<CreateLink />
+							{/* <CreateLink />
 							<Separator />
 							<DiffSourceToggleWrapper>
 								<UndoRedo />
 							</DiffSourceToggleWrapper>
 							<InsertCodeBlock />
-							<InsertImage />
+							<InsertImage /> */}
 						</>
 					),
 				}),
 			]}
+			{...props}
+			ref={editorRef}
+			className={cn("border-2 rounded-xl", props.className)}
+			contentEditableClassName="prose"
 		/>
 	);
 }
