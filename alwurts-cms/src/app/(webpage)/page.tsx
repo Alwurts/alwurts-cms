@@ -56,7 +56,7 @@ export default function Home() {
 						<TypewriterText
 							options={[
 								"Software Developer",
-								"Web Developer",
+								"Indie Hacker",
 								"Full Stack Engineer",
 								"Problem Solver",
 							]}

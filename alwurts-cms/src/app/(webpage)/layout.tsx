@@ -8,6 +8,7 @@ import { MailIcon } from "@/components/icons/MailIcon";
 import { GithubIcon } from "@/components/icons/GithubIcon";
 import { LinkedinIcon } from "@/components/icons/LinkedInIcon";
 import { XIcon } from "@/components/icons/XIcon";
+import DarkModeToggle from "./components/DarkModeToggle";
 
 const roboto = Roboto({
 	weight: ["100", "300", "400", "500", "700", "900"],
@@ -31,24 +32,27 @@ export default async function WebpageLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<div>
+		<div className="bg-background-alwurts text-foreground-alwurts">
 			<nav className="fixed inset-x-0 top-0 z-50 bg-background-alwurts/80 backdrop-blur-sm h-fit">
 				<div className="mx-auto px-6 md:px-12 flex justify-between max-w-5xl h-20 py-3">
 					<Logo className="w-auto h-auto" />
-					<div className="flex items-center space-x-4">
-						{links.map((link) => (
-							<Link
-								key={link.href}
-								className={buttonVariants({
-									variant: "link",
-									size: "xl",
-									className: "px-1.5 h-9",
-								})}
-								href="/"
-							>
-								{link.label}
-							</Link>
-						))}
+					<div className="flex items-center space-x-8">
+						<div className="flex items-center space-x-4">
+							{links.map((link) => (
+								<Link
+									key={link.href}
+									className={buttonVariants({
+										variant: "link",
+										//size: "xl",
+										className: "text-xl",
+									})}
+									href="/"
+								>
+									{link.label}
+								</Link>
+							))}
+						</div>
+						<DarkModeToggle />
 					</div>
 				</div>
 			</nav>

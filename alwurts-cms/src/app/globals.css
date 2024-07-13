@@ -46,6 +46,20 @@
     }
 
     .dark {
+      /* Alwurts */
+      --background-alwurts: 20 14.3% 4.1%;
+      --foreground-alwurts: 60 9.1% 97.8%;
+      --primary-alwurts: 60 9.1% 97.8%;
+      --primary-foreground-alwurts: 24 9.8% 10%;
+      --secondary-alwurts: 12 6.5% 15.1%;
+      --secondary-foreground-alwurts: 60 9.1% 97.8%;
+      --input-alwurts: 60 9.1% 97.8%;
+      --ring-alwurts: 24 5.7% 82.9%;
+      --accent-alwurts: 199 74% 59%;
+      --accent-foreground-alwurts: 60 9.1% 97.8%;
+      --muted-alwurts: 12 6.5% 15.1%;
+      --muted-foreground-alwurts: 24 5.4% 63.9%;
+      /* Shadcn */
       --background: 20 14.3% 4.1%;
       --foreground: 60 9.1% 97.8%;
       --card: 20 14.3% 4.1%;

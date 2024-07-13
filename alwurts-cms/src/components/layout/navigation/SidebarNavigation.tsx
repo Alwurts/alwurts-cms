@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/tooltip";
 import { Settings } from "lucide-react";
 import LogoMonochrome from "@/components/icons/LogoMonochrome";
+import DarkModeToggle from "@/components/DarkModeToggle";
 
 export function SidebarNavigation() {
 	return (
@@ -24,24 +25,11 @@ export function SidebarNavigation() {
 					<span className="sr-only">Alwurts CMS</span>
 				</Link>
 				{navigationRoutes.map((item) => (
-					<NavigationItem key={item.title} type="sidebar" item={item}/>
+					<NavigationItem key={item.title} type="sidebar" item={item} />
 				))}
 			</nav>
 			<nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
-				<TooltipProvider>
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<Link
-								href="#"
-								className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-							>
-								<Settings className="h-5 w-5" />
-								<span className="sr-only">Settings</span>
-							</Link>
-						</TooltipTrigger>
-						<TooltipContent side="right">Settings</TooltipContent>
-					</Tooltip>
-				</TooltipProvider>
+				<DarkModeToggle />
 			</nav>
 		</aside>
 	);

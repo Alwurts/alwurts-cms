@@ -11,21 +11,29 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { TPost } from "@/types/database/post";
 import { CalendarIcon, ClockIcon, TagIcon } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function PostCard({ post }: { post: TPost }) {
 	const [activeTab, setActiveTab] = useState("current");
 	const [isExpanded, setIsExpanded] = useState(false);
+	const [mounted, setMounted] = useState(false);
+
+	useEffect(() => {
+		setMounted(true);
+	}, []);
+
+	if (!mounted) return <Skeleton className="w-full h-[300px]" />;
 
 	const truncatedContent =
 		post.content.slice(0, 150) + (post.content.length > 150 ? "..." : "");
 
 	return (
-		<Card className="w-full mb-6">
+		<Card className="w-full">
 			<CardHeader>
 				<CardTitle className="flex justify-between items-center">
 					<span>{post.title}</span>

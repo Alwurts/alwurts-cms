@@ -19,9 +19,7 @@ export function MainLayout({
 					<DynamicBreadcrumb homePath="/editor" homeTitle="Editor home" />
 					<UserActions />
 				</header>
-				<main>
-					<Suspense fallback={<MainLoader />}>{children}</Suspense>
-				</main>
+				<main>{children}</main>
 			</div>
 		</div>
 	);

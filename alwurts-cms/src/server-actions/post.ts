@@ -18,6 +18,7 @@ export async function createPost() {
 	const newPostTransaction = await db.transaction(async (tx) => {
 		const newPost = await postsProxy.createPost({
 			title: "New Post",
+			description: "New Post Description",
 			content: "New Post Content",
 			author: "Alwurts",
 		});
@@ -25,6 +26,7 @@ export async function createPost() {
 		await postsVersionsProxy.createPostVersion({
 			postId: newPost.id,
 			title: newPost.title,
+			description: newPost.description,
 			content: newPost.content,
 			author: newPost.author,
 		});

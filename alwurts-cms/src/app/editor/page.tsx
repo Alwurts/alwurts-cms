@@ -1,11 +1,6 @@
-import { Button, buttonVariants } from "@/components/ui/button";
-import { SearchIcon } from "lucide-react";
 import { getPosts } from "@/server-actions/post";
-import dynamic from "next/dynamic";
-import Link from "next/link";
+import PostCard from "./components/PostCard";
 import CreateButton from "./components/CreateButton";
-
-const PostCard = dynamic(() => import("./components/PostCard"), { ssr: false });
 
 export default async function CMSPostsPage() {
 	const posts = await getPosts();
@@ -16,9 +11,11 @@ export default async function CMSPostsPage() {
 			<div className="mb-6 flex space-x-4">
 				<CreateButton />
 			</div>
-			{posts.map((post) => (
-				<PostCard key={post.id} post={post} />
-			))}
+			<div className="flex flex-col space-y-6">
+				{posts.map((post) => (
+					<PostCard key={post.id} post={post} />
+				))}
+			</div>
 		</div>
 	);
 }
