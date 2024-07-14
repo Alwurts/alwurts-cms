@@ -11,6 +11,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "www.alejandrowurts.com",
       },
+      {
+        protocol: "https",
+        hostname: "s3.us-east-005.backblazeb2.com",
+      },
     ],
   },
 };
