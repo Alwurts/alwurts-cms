@@ -14,9 +14,9 @@ import {
 import { Input } from "@/components/ui/input";
 import type { MDXEditorMethods } from "@mdxeditor/editor";
 import { useRef } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
+import type { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "@/components/ui/use-toast";
 import { TagsFetch } from "@/components/TagsFetch";
@@ -25,22 +25,16 @@ import type {
 	TPostVersion,
 	TUpdatePostVersion,
 } from "@/types/database/postVersion";
-
-const formSchema = z.object({
-	title: z.string().min(2).max(50),
-	description: z.string().min(2).max(50),
-	author: z.string().min(2).max(50),
-	tags: z.array(z.string()),
-});
+import Image from "next/image";
+import { PostVersionSchema } from "@/zod/postVersion";
+import { convertToFormData } from "@/lib/form";
 
 export default function Editor({ post }: { post: TPostVersion }) {
 	const editorRef = useRef<MDXEditorMethods>(null);
 	const formRef = useRef<HTMLFormElement>(null);
 
 	const savePostVersion = useMutation({
-		mutationFn: async (post: TUpdatePostVersion) => {
-			createPostVersion(post);
-		},
+		mutationFn: createPostVersion,
 		onSuccess: () => {
 			toast({
 				title: "Post saved",
@@ -49,18 +43,27 @@ export default function Editor({ post }: { post: TPostVersion }) {
 		},
 	});
 
-	const form = useForm<z.infer<typeof formSchema>>({
-		resolver: zodResolver(formSchema),
+	const form = useForm<z.infer<typeof PostVersionSchema>>({
+		resolver: zodResolver(PostVersionSchema),
 		defaultValues: {
+			postId: post.postId,
 			title: post.title,
 			description: post.description,
+			content: post.content,
 			author: post.author,
-			tags: post.tags.map((tag) => tag.tagName || ""),
+			date: post.date,
+			tags: post.tags.reduce(
+				(acc, tag, index, array) =>
+					`${acc}${tag.tagName}${index < array.length - 1 ? "," : ""}`,
+				"",
+			),
+			/* imageLarge: post.imageLarge ?? "",
+			imageSmall: post.imageSmall ?? "", */
 		},
 	});
 
 	// 2. Define a submit handler.
-	function onSubmit(values: z.infer<typeof formSchema>) {
+	function onSubmit(values: z.infer<typeof PostVersionSchema>) {
 		const content = editorRef.current?.getMarkdown();
 		if (!content) {
 			toast({
@@ -69,14 +72,28 @@ export default function Editor({ post }: { post: TPostVersion }) {
 			});
 			return;
 		}
-		console.log("content", content);
-		savePostVersion.mutate({
-			...values,
-			content,
-			postId: post.postId,
-			tags: values.tags.map((tag) => ({ name: tag })),
-		});
+		const formData = new FormData();
+		formData.append("postId", values.postId);
+		formData.append("title", values.title);
+		formData.append("description", values.description);
+		formData.append("content", content);
+		formData.append("author", values.author);
+		formData.append("date", values.date);
+		formData.append("tags", values.tags);
+		if (values.imageLarge) {
+			formData.append("imageLarge", values.imageLarge);
+		}
+		if (values.imageSmall) {
+			formData.append("imageSmall", values.imageSmall);
+		}
+		console.log("formData", formData.entries());
+		savePostVersion.mutate(formData);
 	}
+
+	const imageLargeWatch = useWatch({
+		control: form.control,
+		name: "imageLarge",
+	});
 
 	return (
 		<CardLayout
@@ -129,6 +146,58 @@ export default function Editor({ post }: { post: TPostVersion }) {
 								</FormItem>
 							)}
 						/>
+						<div>{JSON.stringify(form.getValues("imageLarge"))}</div>
+						<FormField
+							control={form.control}
+							name="imageLarge"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Image Large</FormLabel>
+									{imageLargeWatch ? (
+										<Image
+											src={URL.createObjectURL(imageLargeWatch)}
+											alt="Post image preview"
+											width={200}
+											height={200}
+											className="object-cover"
+										/>
+									) : post.imageLarge ? (
+										<Image
+											src={post.imageLarge}
+											alt="Post image"
+											width={200}
+											height={200}
+											className="object-cover"
+										/>
+									) : null}
+									<FormControl>
+										<Input
+											placeholder="Post Image"
+											type="file"
+											accept="image/png, image/jpeg"
+											/* value={field.value?.name} */
+											onChange={(e) => {
+												console.log(e.target.files);
+												const file = e.target.files?.[0];
+
+												/* if (
+													e.target.files?.[0].type !== "image/png" &&
+													e.target.files?.[0].type !== "image/jpeg"
+												) {
+													toast({
+														title: "Invalid file type",
+														description: "Please use a png or jpg file",
+													});
+													return;
+												} */
+												field.onChange(file);
+											}}
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
 						<FormItem>
 							<FormLabel>Last Saved</FormLabel>
 							<Input value={post.createdAt.toLocaleString()} disabled />
@@ -141,8 +210,10 @@ export default function Editor({ post }: { post: TPostVersion }) {
 									<FormLabel>Tags</FormLabel>
 									<FormControl>
 										<TagsFetch
-											fieldValue={field.value}
-											setFieldValue={field.onChange}
+											fieldValue={
+												field.value.length > 0 ? field.value.split(",") : []
+											}
+											setFieldValue={(tags) => field.onChange(tags.join(","))}
 										/>
 									</FormControl>
 									<FormMessage />

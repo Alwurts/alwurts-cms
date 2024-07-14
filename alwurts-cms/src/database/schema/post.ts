@@ -19,7 +19,7 @@ export const postTags = pgTable("post_tags", {
 
 export const postTagsRelations = relations(postTags, ({ many }) => ({
 	posts: many(postsToTags),
-	postsVersions: many(postsVersionsToTags),
+	//postsVersions: many(postsVersionsToTags),
 }));
 
 export const postsToTags = pgTable(
@@ -55,6 +55,8 @@ export const posts = pgTable("posts", {
 	content: text("content").notNull(),
 	author: varchar("author", { length: 255 }).notNull(),
 	date: date("date").notNull(),
+	imageLarge: varchar("image_large", { length: 255 }),
+	imageSmall: varchar("image_small", { length: 255 }),
 	isFeatured: boolean("is_featured").notNull().default(false),
 	isPublished: boolean("is_published").notNull().default(false),
 	createdAt: timestamp("created_at").notNull(),
@@ -78,6 +80,8 @@ export const postVersions = pgTable(
 		content: text("content").notNull(),
 		author: varchar("author", { length: 255 }).notNull(),
 		date: date("date").notNull(),
+		imageLarge: varchar("image_large", { length: 255 }),
+		imageSmall: varchar("image_small", { length: 255 }),
 		isFeatured: boolean("is_featured").notNull().default(false),
 		isPublished: boolean("is_published").notNull().default(false),
 		publishedAt: timestamp("published_at"),

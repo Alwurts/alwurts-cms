@@ -28,29 +28,35 @@ export const getLatestPostVersion = async (postId: string) => {
 };
 
 export const createPostVersion = async (newPostVersion: TCreatePostVersion) => {
-	const { tags, ...newPostVersionWithoutTags } = newPostVersion;
+	const { tags, imageLarge, imageSmall, ...newPostVersionWithoutTags } = newPostVersion;
 
 	return db.transaction(async (tx) => {
-		const currentPostVersion = await tx
+		const currentPostVersions = await tx
 			.select()
 			.from(postVersions)
 			.where(eq(postVersions.postId, newPostVersionWithoutTags.postId))
 			.orderBy(desc(postVersions.postVersion))
 			.limit(1);
 
+		const currentPostVersion = currentPostVersions[0];
+
 		const newPostResult = await db
 			.insert(postVersions)
 			.values({
 				...newPostVersionWithoutTags,
+				imageLarge: imageLarge ?? currentPostVersion?.imageLarge,
+				imageSmall: imageSmall ?? currentPostVersion?.imageSmall,
 				postVersion:
-					currentPostVersion.length > 0
-						? currentPostVersion[0].postVersion + 1
+					currentPostVersion
+						? currentPostVersion.postVersion + 1
 						: 1,
 				createdAt: new Date(),
 			})
 			.returning();
 
 		const newPostVersionId = newPostResult[0].postVersion;
+
+		console.log("tags", tags);
 
 		if (tags.length > 0) {
 			await db.insert(postsVersionsToTags).values(
