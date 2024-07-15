@@ -29,6 +29,14 @@ import Image from "next/image";
 import { PostVersionSchema } from "@/zod/postVersion";
 import { convertToFormData } from "@/lib/form";
 
+function extractDimensionsFromFilename(filename: string): { width: number; height: number } {
+  const match = filename.match(/-(\d+)x(\d+)-/);
+  if (match) {
+    return { width: Number.parseInt(match[1], 10), height: Number.parseInt(match[2], 10) };
+  }
+  return { width: 200, height: 200 }; // Default dimensions if not found
+}
+
 export default function Editor({ post }: { post: TPostVersion }) {
 	const editorRef = useRef<MDXEditorMethods>(null);
 	const formRef = useRef<HTMLFormElement>(null);
@@ -94,6 +102,13 @@ export default function Editor({ post }: { post: TPostVersion }) {
 		control: form.control,
 		name: "imageLarge",
 	});
+
+	const getImageDimensions = (image: File | string) => {
+    if (typeof image === 'string') {
+      return extractDimensionsFromFilename(image);
+    }
+    return { width: 200, height: 200 }; // Default for File objects
+  };
 
 	return (
 		<CardLayout
@@ -165,8 +180,8 @@ export default function Editor({ post }: { post: TPostVersion }) {
 										<Image
 											src={post.imageLarge}
 											alt="Post image"
-											width={200}
-											height={200}
+											width={getImageDimensions(post.imageLarge).width}
+											height={getImageDimensions(post.imageLarge).height}
 											className="object-cover"
 										/>
 									) : null}
