@@ -9,7 +9,7 @@ const nextConfig = {
       },
       {
         protocol: "https",
-        hostname: "www.alejandrowurts.com",
+        hostname: "alwurts-cms.s3.us-east-005.backblazeb2.com",
       },
       {
         protocol: "https",

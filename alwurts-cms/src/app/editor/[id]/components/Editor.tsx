@@ -21,21 +21,36 @@ import { useMutation } from "@tanstack/react-query";
 import { toast } from "@/components/ui/use-toast";
 import { TagsFetch } from "@/components/TagsFetch";
 import { createPostVersion } from "@/server-actions/postVersions";
-import type {
-	TPostVersion,
-	TUpdatePostVersion,
-} from "@/types/database/postVersion";
+import type { TPostVersion } from "@/types/database/postVersion";
 import Image from "next/image";
 import { PostVersionSchema } from "@/zod/postVersion";
 import { convertToFormData } from "@/lib/form";
 
-function extractDimensionsFromFilename(filename: string): { width: number; height: number } {
-  const match = filename.match(/-(\d+)x(\d+)-/);
-  if (match) {
-    return { width: Number.parseInt(match[1], 10), height: Number.parseInt(match[2], 10) };
-  }
-  return { width: 200, height: 200 }; // Default dimensions if not found
+function extractDimensionsFromFilename(filename: string): {
+	width: number;
+	height: number;
+} {
+	const match = filename.match(/(\d+)x(\d+)(?=\.[^.]+$)/);
+	if (match) {
+		const dimensions = {
+			width: Number.parseInt(match[1], 10),
+			height: Number.parseInt(match[2], 10),
+		};
+		console.log("dimensions", dimensions);
+		return dimensions;
+	}
+	return { width: 200, height: 200 }; // Default dimensions if not found
 }
+
+const getImageDimensions = (image: string | File) => {
+	if (typeof image === "string") {
+		return extractDimensionsFromFilename(image);
+	}
+	if (image instanceof File) {
+		return extractDimensionsFromFilename(image.name);
+	}
+	return { width: 200, height: 200 };
+};
 
 export default function Editor({ post }: { post: TPostVersion }) {
 	const editorRef = useRef<MDXEditorMethods>(null);
@@ -86,7 +101,10 @@ export default function Editor({ post }: { post: TPostVersion }) {
 		formData.append("description", values.description);
 		formData.append("content", content);
 		formData.append("author", values.author);
-		formData.append("date", values.date);
+		formData.append(
+			"date",
+			values.date instanceof Date ? values.date.toISOString() : values.date,
+		);
 		formData.append("tags", values.tags);
 		if (values.imageLarge) {
 			formData.append("imageLarge", values.imageLarge);
@@ -103,13 +121,6 @@ export default function Editor({ post }: { post: TPostVersion }) {
 		name: "imageLarge",
 	});
 
-	const getImageDimensions = (image: File | string) => {
-    if (typeof image === 'string') {
-      return extractDimensionsFromFilename(image);
-    }
-    return { width: 200, height: 200 }; // Default for File objects
-  };
-
 	return (
 		<CardLayout
 			cardHeaderContent={
@@ -119,9 +130,11 @@ export default function Editor({ post }: { post: TPostVersion }) {
 						onSubmit={form.handleSubmit(onSubmit)}
 						className="grid grid-cols-2 gap-y-2 gap-x-4"
 					>
-						<Button size="sm" type="submit" className="col-span-2">
-							Save
-						</Button>
+						<div className="col-span-2">
+							<Button size="sm" type="submit">
+								Save
+							</Button>
+						</div>
 						<FormField
 							control={form.control}
 							name="title"
@@ -161,8 +174,7 @@ export default function Editor({ post }: { post: TPostVersion }) {
 								</FormItem>
 							)}
 						/>
-						<div>{JSON.stringify(form.getValues("imageLarge"))}</div>
-						<FormField
+						{/* <FormField
 							control={form.control}
 							name="imageLarge"
 							render={({ field }) => (
@@ -178,11 +190,11 @@ export default function Editor({ post }: { post: TPostVersion }) {
 										/>
 									) : post.imageLarge ? (
 										<Image
-											src={post.imageLarge}
+											src={post.imageLarge.url}
 											alt="Post image"
-											width={getImageDimensions(post.imageLarge).width}
-											height={getImageDimensions(post.imageLarge).height}
-											className="object-cover"
+											width={getImageDimensions(post.imageLarge.name).width}
+											height={getImageDimensions(post.imageLarge.name).height}
+											className="object-none"
 										/>
 									) : null}
 									<FormControl>
@@ -190,22 +202,35 @@ export default function Editor({ post }: { post: TPostVersion }) {
 											placeholder="Post Image"
 											type="file"
 											accept="image/png, image/jpeg"
-											/* value={field.value?.name} */
 											onChange={(e) => {
 												console.log(e.target.files);
 												const file = e.target.files?.[0];
-
-												/* if (
-													e.target.files?.[0].type !== "image/png" &&
-													e.target.files?.[0].type !== "image/jpeg"
-												) {
-													toast({
-														title: "Invalid file type",
-														description: "Please use a png or jpg file",
-													});
-													return;
-												} */
 												field.onChange(file);
+											}}
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/> */}
+						<FormField
+							control={form.control}
+							name="date"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel>Post Date</FormLabel>
+									<FormControl>
+										<Input
+											placeholder="Post Date"
+											type="date"
+											value={
+												field.value instanceof Date
+													? field.value.toISOString().split("T")[0]
+													: field.value
+											}
+											onChange={(e) => {
+												const date = new Date(e.target.value);
+												field.onChange(date);
 											}}
 										/>
 									</FormControl>
@@ -214,7 +239,7 @@ export default function Editor({ post }: { post: TPostVersion }) {
 							)}
 						/>
 						<FormItem>
-							<FormLabel>Last Saved</FormLabel>
+							<FormLabel>Created at</FormLabel>
 							<Input value={post.createdAt.toLocaleString()} disabled />
 						</FormItem>
 						<FormField

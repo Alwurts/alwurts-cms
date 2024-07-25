@@ -22,7 +22,7 @@ export async function createPost() {
 			description: "New Post Description",
 			content: "New Post Content",
 			author: "Alwurts",
-			date: new Date().toISOString(),
+			date: new Date(),
 		});
 
 		await postsVersionsProxy.createPostVersion({

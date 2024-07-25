@@ -1,15 +1,11 @@
 import "server-only";
 
 import { db } from "@/database";
-import {
-	postTags,
-	postTagsRelations,
-	postVersions,
-	postsToTags,
-	postsVersionsToTags,
-} from "@/database/schema";
+import { postVersions, postsVersionsToTags } from "@/database/schema";
 import type { TCreatePostVersion } from "@/types/database/postVersion";
-import { eq, desc, and } from "drizzle-orm";
+import { eq, desc } from "drizzle-orm";
+import { uploadImage } from "@/lib/s3";
+import * as filesProxy from "@/proxies/files";
 
 export const getPostsVersions = async (postId: string) => {
 	return db.select().from(postVersions).where(eq(postVersions.postId, postId));
@@ -21,6 +17,8 @@ export const getLatestPostVersion = async (postId: string) => {
 		orderBy: desc(postVersions.postVersion),
 		with: {
 			tags: true,
+			imageLarge: true,
+			imageSmall: true,
 		},
 	});
 
@@ -28,7 +26,19 @@ export const getLatestPostVersion = async (postId: string) => {
 };
 
 export const createPostVersion = async (newPostVersion: TCreatePostVersion) => {
-	const { tags, imageLarge, imageSmall, ...newPostVersionWithoutTags } = newPostVersion;
+	const { tags, imageLarge, imageSmall, ...newPostVersionWithoutTags } =
+		newPostVersion;
+
+	let imageLargeId: string | undefined;
+	let imageSmallId: string | undefined;
+	if (imageLarge) {
+		const { id } = await filesProxy.createImageFile(imageLarge);
+		imageLargeId = id;
+	}
+	if (imageSmall) {
+		const { id } = await filesProxy.createImageFile(imageSmall);
+		imageSmallId = id;
+	}
 
 	return db.transaction(async (tx) => {
 		const currentPostVersions = await tx
@@ -44,13 +54,13 @@ export const createPostVersion = async (newPostVersion: TCreatePostVersion) => {
 			.insert(postVersions)
 			.values({
 				...newPostVersionWithoutTags,
-				imageLarge: imageLarge ?? currentPostVersion?.imageLarge,
-				imageSmall: imageSmall ?? currentPostVersion?.imageSmall,
-				postVersion:
-					currentPostVersion
-						? currentPostVersion.postVersion + 1
-						: 1,
+				imageLargeId: imageLargeId ?? currentPostVersion?.imageLargeId,
+				imageSmallId: imageSmallId ?? currentPostVersion?.imageSmallId,
+				postVersion: currentPostVersion
+					? currentPostVersion.postVersion + 1
+					: 1,
 				createdAt: new Date(),
+				date: newPostVersion.date instanceof Date ? newPostVersion.date : new Date(newPostVersion.date),
 			})
 			.returning();
 

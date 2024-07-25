@@ -6,8 +6,10 @@ export const PostVersionSchema = z.object({
 	description: z.string().min(2).max(50),
 	content: z.string(),
 	author: z.string().min(2).max(50),
-	date: z.string(),
+	date: z.date().or(z.string()),
 	tags: z.string(),
 	imageLarge: z.instanceof(File).optional(),
 	imageSmall: z.instanceof(File).optional(),
 });
+
+export type ZPostVersion = z.infer<typeof PostVersionSchema>;

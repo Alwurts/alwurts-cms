@@ -1,15 +1,25 @@
-import AWS from "aws-sdk";
+import { Upload } from "@aws-sdk/lib-storage";
+import { S3 } from "@aws-sdk/client-s3";
 import { v4 as uuidv4 } from "uuid";
 import sizeOf from "image-size";
 
-const s3 = new AWS.S3({
+const s3 = new S3({
 	endpoint: process.env.S3_ENDPOINT,
-	accessKeyId: process.env.S3_ACCESS_KEY_ID,
-	secretAccessKey: process.env.S3_SECRET_ACCESS_KEY,
-	signatureVersion: "v4",
+	credentials: {
+		accessKeyId: process.env.S3_ACCESS_KEY_ID as string,
+		secretAccessKey: process.env.S3_SECRET_ACCESS_KEY as string,
+	},
+	region: process.env.S3_REGION,
 });
 
-export async function uploadImage(file: File) {
+export async function uploadImage(file: File): Promise<{
+	imageName: string;
+	imageUrl: string;
+	imageSize: number;
+	width: number;
+	height: number;
+	mimeType: string;
+}> {
 	const fileBuffer = await file.arrayBuffer();
 
 	// Get image dimensions
@@ -28,8 +38,23 @@ export async function uploadImage(file: File) {
 	};
 
 	try {
-		const result = await s3.upload(params).promise();
-		return result.Location;
+		const result = await new Upload({
+			client: s3,
+			params,
+		}).done();
+
+		if (!result.Location) {
+			throw new Error("No url returned from S3");
+		}
+
+		return {
+			imageName: fileName,
+			imageUrl: result.Location,
+			imageSize: file.size,
+			width,
+			height,
+			mimeType: file.type,
+		};
 	} catch (error) {
 		console.error("Error uploading file:", error);
 		if (error instanceof Error) {

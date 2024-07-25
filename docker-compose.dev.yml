@@ -47,6 +47,7 @@ services:
       - S3_SECRET_ACCESS_KEY=${S3_SECRET_ACCESS_KEY}
       - S3_BUCKET_NAME=${S3_BUCKET_NAME}
       - S3_ENDPOINT=${S3_ENDPOINT}
+      - S3_REGION=${S3_REGION}
     volumes:
       - ./alwurts-cms/src:/app/src
       - ./alwurts-cms/public:/app/public

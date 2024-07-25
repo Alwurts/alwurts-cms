@@ -1,17 +1,13 @@
-import { relations, sql } from "drizzle-orm";
+import { relations } from "drizzle-orm";
 import {
-	boolean,
 	date,
-	foreignKey,
-	index,
 	integer,
 	pgTable,
-	primaryKey,
-	text,
 	timestamp,
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
+import { posts, postVersions } from "./post";
 
 export const files = pgTable("files", {
 	id: uuid("id").primaryKey().defaultRandom(),
@@ -19,10 +15,14 @@ export const files = pgTable("files", {
 	description: varchar("description", { length: 255 }).notNull(),
 	size: integer("size").notNull(),
 	type: varchar("type", { length: 255 }).notNull(),
+	url: varchar("url", { length: 255 }).notNull(),
 	date: date("date").notNull(),
 	createdAt: timestamp("created_at").notNull(),
 });
 
 export const filesRelations = relations(files, ({ many }) => ({
-	//versions: many(postVersions),
+	postsImageLarge: many(posts, { relationName: "imageLarge" }),
+	postsImageSmall: many(posts, { relationName: "imageSmall" }),
+	postVersionsImageLarge: many(postVersions, { relationName: "imageLarge" }),
+	postVersionsImageSmall: many(postVersions, { relationName: "imageSmall" }),
 }));
