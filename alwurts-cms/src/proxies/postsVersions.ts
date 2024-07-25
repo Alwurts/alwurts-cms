@@ -26,19 +26,14 @@ export const getLatestPostVersion = async (postId: string) => {
 };
 
 export const createPostVersion = async (newPostVersion: TCreatePostVersion) => {
-	const { tags, imageLarge, imageSmall, ...newPostVersionWithoutTags } =
-		newPostVersion;
-
-	let imageLargeId: string | undefined;
-	let imageSmallId: string | undefined;
-	if (imageLarge) {
-		const { id } = await filesProxy.createImageFile(imageLarge);
-		imageLargeId = id;
-	}
-	if (imageSmall) {
-		const { id } = await filesProxy.createImageFile(imageSmall);
-		imageSmallId = id;
-	}
+	const {
+		tags,
+		imageLarge,
+		imageSmall,
+		imageLargeDescription,
+		imageSmallDescription,
+		...newPostVersionWithoutTags
+	} = newPostVersion;
 
 	return db.transaction(async (tx) => {
 		const currentPostVersions = await tx
@@ -50,6 +45,18 @@ export const createPostVersion = async (newPostVersion: TCreatePostVersion) => {
 
 		const currentPostVersion = currentPostVersions[0];
 
+		const imageLargeId = await filesProxy.handleImageUpdate(
+			imageLarge,
+			imageLargeDescription,
+			currentPostVersion?.imageLargeId,
+		);
+
+		const imageSmallId = await filesProxy.handleImageUpdate(
+			imageSmall,
+			imageSmallDescription,
+			currentPostVersion?.imageSmallId,
+		);
+
 		const newPostResult = await db
 			.insert(postVersions)
 			.values({
@@ -60,7 +67,10 @@ export const createPostVersion = async (newPostVersion: TCreatePostVersion) => {
 					? currentPostVersion.postVersion + 1
 					: 1,
 				createdAt: new Date(),
-				date: newPostVersion.date instanceof Date ? newPostVersion.date : new Date(newPostVersion.date),
+				date:
+					newPostVersion.date instanceof Date
+						? newPostVersion.date
+						: new Date(newPostVersion.date),
 			})
 			.returning();
 

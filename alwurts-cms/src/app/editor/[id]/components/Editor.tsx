@@ -25,6 +25,7 @@ import type { TPostVersion } from "@/types/database/postVersion";
 import Image from "next/image";
 import { PostVersionSchema } from "@/zod/postVersion";
 import { convertToFormData } from "@/lib/form";
+import { Separator } from "@/components/ui/separator";
 
 function extractDimensionsFromFilename(filename: string): {
 	width: number;
@@ -32,12 +33,10 @@ function extractDimensionsFromFilename(filename: string): {
 } {
 	const match = filename.match(/(\d+)x(\d+)(?=\.[^.]+$)/);
 	if (match) {
-		const dimensions = {
+		return {
 			width: Number.parseInt(match[1], 10),
 			height: Number.parseInt(match[2], 10),
 		};
-		console.log("dimensions", dimensions);
-		return dimensions;
 	}
 	return { width: 200, height: 200 }; // Default dimensions if not found
 }
@@ -80,8 +79,10 @@ export default function Editor({ post }: { post: TPostVersion }) {
 					`${acc}${tag.tagName}${index < array.length - 1 ? "," : ""}`,
 				"",
 			),
-			/* imageLarge: post.imageLarge ?? "",
-			imageSmall: post.imageSmall ?? "", */
+			imageLarge: undefined,
+			imageLargeDescription: post.imageLarge?.description || "",
+			imageSmall: undefined,
+			imageSmallDescription: post.imageSmall?.description || "",
 		},
 	});
 
@@ -105,13 +106,23 @@ export default function Editor({ post }: { post: TPostVersion }) {
 			"date",
 			values.date instanceof Date ? values.date.toISOString() : values.date,
 		);
+
 		formData.append("tags", values.tags);
+
 		if (values.imageLarge) {
 			formData.append("imageLarge", values.imageLarge);
 		}
+		if (values.imageLargeDescription) {
+			formData.append("imageLargeDescription", values.imageLargeDescription);
+		}
+
 		if (values.imageSmall) {
 			formData.append("imageSmall", values.imageSmall);
 		}
+		if (values.imageSmallDescription) {
+			formData.append("imageSmallDescription", values.imageSmallDescription);
+		}
+
 		console.log("formData", formData.entries());
 		savePostVersion.mutate(formData);
 	}
@@ -121,149 +132,228 @@ export default function Editor({ post }: { post: TPostVersion }) {
 		name: "imageLarge",
 	});
 
+	const imageSmallWatch = useWatch({
+		control: form.control,
+		name: "imageSmall",
+	});
+
 	return (
 		<CardLayout
+			classname="max-w-6xl mx-auto"
 			cardHeaderContent={
 				<Form {...form}>
 					<form
 						ref={formRef}
 						onSubmit={form.handleSubmit(onSubmit)}
-						className="grid grid-cols-2 gap-y-2 gap-x-4"
+						className="flex flex-col gap-10"
 					>
-						<div className="col-span-2">
-							<Button size="sm" type="submit">
-								Save
-							</Button>
+						<div className="grid grid-cols-2 gap-y-2 gap-x-4">
+							<div className="col-span-2">
+								<Button size="sm" type="submit">
+									Save
+								</Button>
+							</div>
+							<FormField
+								control={form.control}
+								name="title"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Title</FormLabel>
+										<FormControl>
+											<Input placeholder="Post Title" {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="description"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Description</FormLabel>
+										<FormControl>
+											<Input placeholder="Post Description" {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="author"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Author</FormLabel>
+										<FormControl>
+											<Input placeholder="Post Author" {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+
+							<FormField
+								control={form.control}
+								name="date"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>Post Date</FormLabel>
+										<FormControl>
+											<Input
+												placeholder="Post Date"
+												type="date"
+												value={
+													field.value instanceof Date
+														? field.value.toISOString().split("T")[0]
+														: field.value
+												}
+												onChange={(e) => {
+													const date = new Date(e.target.value);
+													field.onChange(date);
+												}}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormItem>
+								<FormLabel>Created at</FormLabel>
+								<Input value={post.createdAt.toLocaleString()} disabled />
+							</FormItem>
+							<FormField
+								control={form.control}
+								name="tags"
+								render={({ field }) => (
+									<FormItem className="col-span-2">
+										<FormLabel>Tags</FormLabel>
+										<FormControl>
+											<TagsFetch
+												fieldValue={
+													field.value.length > 0 ? field.value.split(",") : []
+												}
+												setFieldValue={(tags) => field.onChange(tags.join(","))}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
 						</div>
-						<FormField
-							control={form.control}
-							name="title"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Title</FormLabel>
-									<FormControl>
-										<Input placeholder="Post Title" {...field} />
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={form.control}
-							name="description"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Description</FormLabel>
-									<FormControl>
-										<Input placeholder="Post Description" {...field} />
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<FormField
-							control={form.control}
-							name="author"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Author</FormLabel>
-									<FormControl>
-										<Input placeholder="Post Author" {...field} />
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						{/* <FormField
-							control={form.control}
-							name="imageLarge"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Image Large</FormLabel>
-									{imageLargeWatch ? (
-										<Image
-											src={URL.createObjectURL(imageLargeWatch)}
-											alt="Post image preview"
-											width={200}
-											height={200}
-											className="object-cover"
-										/>
-									) : post.imageLarge ? (
-										<Image
-											src={post.imageLarge.url}
-											alt="Post image"
-											width={getImageDimensions(post.imageLarge.name).width}
-											height={getImageDimensions(post.imageLarge.name).height}
-											className="object-none"
-										/>
-									) : null}
-									<FormControl>
-										<Input
-											placeholder="Post Image"
-											type="file"
-											accept="image/png, image/jpeg"
-											onChange={(e) => {
-												console.log(e.target.files);
-												const file = e.target.files?.[0];
-												field.onChange(file);
-											}}
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/> */}
-						<FormField
-							control={form.control}
-							name="date"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel>Post Date</FormLabel>
-									<FormControl>
-										<Input
-											placeholder="Post Date"
-											type="date"
-											value={
-												field.value instanceof Date
-													? field.value.toISOString().split("T")[0]
-													: field.value
-											}
-											onChange={(e) => {
-												const date = new Date(e.target.value);
-												field.onChange(date);
-											}}
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
-						<FormItem>
-							<FormLabel>Created at</FormLabel>
-							<Input value={post.createdAt.toLocaleString()} disabled />
-						</FormItem>
-						<FormField
-							control={form.control}
-							name="tags"
-							render={({ field }) => (
-								<FormItem className="col-span-2">
-									<FormLabel>Tags</FormLabel>
-									<FormControl>
-										<TagsFetch
-											fieldValue={
-												field.value.length > 0 ? field.value.split(",") : []
-											}
-											setFieldValue={(tags) => field.onChange(tags.join(","))}
-										/>
-									</FormControl>
-									<FormMessage />
-								</FormItem>
-							)}
-						/>
+						<div className="flex justify-around w-full gap-4">
+							<div className="flex gap-6 border border-input rounded-md p-4">
+								<Image
+									src={
+										imageLargeWatch
+											? URL.createObjectURL(imageLargeWatch)
+											: post.imageLarge?.url ?? ""
+									}
+									alt="Post image"
+									width={200}
+									height={200}
+									className="object-contain h-[200px] w-auto"
+								/>
+
+								<div className="flex flex-col gap-2">
+									<FormField
+										control={form.control}
+										name="imageLarge"
+										render={({ field }) => (
+											<FormItem className="">
+												<FormLabel>Image Large</FormLabel>
+												<FormControl>
+													<Input
+														placeholder="Post Image Large"
+														type="file"
+														accept="image/png, image/jpeg"
+														onChange={(e) => {
+															const file = e.target.files?.[0];
+															field.onChange(file);
+															form.setValue("imageLargeDescription", "");
+														}}
+													/>
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+									<FormField
+										control={form.control}
+										name="imageLargeDescription"
+										render={({ field }) => (
+											<FormItem className="">
+												<FormLabel>Image Large Description</FormLabel>
+												<FormControl>
+													<Input
+														placeholder="Describe the large image"
+														{...field}
+													/>
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								</div>
+							</div>
+							<div className="flex gap-6 border border-input rounded-md p-4">
+								<Image
+									src={
+										imageSmallWatch
+											? URL.createObjectURL(imageSmallWatch)
+											: post.imageSmall?.url ?? ""
+									}
+									alt="Post image"
+									width={200}
+									height={200}
+									className="object-contain h-[200px] w-auto"
+								/>
+
+								<div className="flex flex-col gap-2">
+									<FormField
+										control={form.control}
+										name="imageSmall"
+										render={({ field }) => (
+											<FormItem className="">
+												<FormLabel>Image Small</FormLabel>
+												<FormControl>
+													<Input
+														placeholder="Post Image Small"
+														type="file"
+														accept="image/png, image/jpeg"
+														onChange={(e) => {
+															const file = e.target.files?.[0];
+															field.onChange(file);
+															form.setValue("imageSmallDescription", "");
+														}}
+													/>
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+									<FormField
+										control={form.control}
+										name="imageSmallDescription"
+										render={({ field }) => (
+											<FormItem className="">
+												<FormLabel>Image Small Description</FormLabel>
+												<FormControl>
+													<Input
+														placeholder="Describe the small image"
+														{...field}
+													/>
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								</div>
+							</div>
+						</div>
 					</form>
 				</Form>
 			}
-			classname="max-w-6xl mx-auto"
 		>
 			<SafeMDXEditor ref={editorRef} markdown={post.content} />
 		</CardLayout>

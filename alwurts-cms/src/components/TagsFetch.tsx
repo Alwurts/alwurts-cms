@@ -83,6 +83,7 @@ export function TagsFetch({
 						variant="secondary"
 						size="sm"
 						type="button"
+						className="capitalize"
 						onClick={() => setOpen(true)}
 					>
 						{tag}

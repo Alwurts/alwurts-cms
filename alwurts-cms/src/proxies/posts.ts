@@ -21,6 +21,7 @@ export const getPosts = async () => {
 			versions: true,
 		},
 	});
+	console.log("result", result);
 	return result;
 };
 

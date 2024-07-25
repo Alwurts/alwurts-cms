@@ -13,18 +13,18 @@ export async function getLatestPostVersion(postId: string) {
 }
 
 export async function createPostVersion(postFormData: FormData) {
-	console.log("postFormData", postFormData);
-	const formData = Object.fromEntries(postFormData);
-	const newPostVersion = PostVersionSchema.parse(formData);
+  console.log("postFormData", postFormData);
+  const formData = Object.fromEntries(postFormData);
+  const newPostVersion = PostVersionSchema.parse(formData);
 
-	await postsVersionsProxy.createPostVersion({
-		...newPostVersion,
-		tags:
-			newPostVersion.tags.length > 0
-				? newPostVersion.tags.split(",").map((tag) => ({ name: tag }))
-				: [],
-	});
+  await postsVersionsProxy.createPostVersion({
+    ...newPostVersion,
+    tags:
+      newPostVersion.tags.length > 0
+        ? newPostVersion.tags.split(",").map((tag) => ({ name: tag }))
+        : [],
+  });
 
-	revalidatePath(`/editor/${newPostVersion.postId}`);
-	revalidatePath("/editor");
+  revalidatePath(`/editor/${newPostVersion.postId}`);
+  revalidatePath("/editor");
 }

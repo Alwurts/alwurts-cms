@@ -58,55 +58,9 @@ export default function PostCard({ post }: { post: TPost }) {
 					</div>
 				</CardDescription>
 			</CardHeader>
-			<CardContent>
-				<Tabs value={activeTab} onValueChange={setActiveTab}>
-					<TabsList>
-						<TabsTrigger value="current">Current Version</TabsTrigger>
-						<TabsTrigger value="history">Version History</TabsTrigger>
-					</TabsList>
-					<TabsContent value="current">
-						<p>{isExpanded ? post.content : truncatedContent}</p>
-						{post.content.length > 150 && (
-							<Button variant="link" onClick={() => setIsExpanded(!isExpanded)}>
-								{isExpanded ? "Show Less" : "Read More"}
-							</Button>
-						)}
-						{/* <div className="flex items-center space-x-4 mt-4">
-							<span className="flex items-center">
-								<EyeIcon className="w-4 h-4 mr-1" /> {post.views}
-							</span>
-							<span className="flex items-center">
-								<ThumbsUpIcon className="w-4 h-4 mr-1" /> {post.likes}
-							</span>
-							<span className="flex items-center">
-								<MessageSquareIcon className="w-4 h-4 mr-1" /> {post.comments}
-							</span>
-						</div> */}
-					</TabsContent>
-					<TabsContent value="history">
-						<ScrollArea className="h-[200px]">
-							{post.versions.map((version) => (
-								<div
-									key={version.postVersion}
-									className="mb-4 p-4 border rounded"
-								>
-									<h4 className="font-bold">Version {version.postVersion}</h4>
-									<p className="text-sm text-gray-500">
-										Created: {new Date(version.createdAt).toLocaleString()}
-									</p>
-									<p className="mt-2">{version.content.slice(0, 100)}...</p>
-									<Badge
-										variant={version.isPublished ? "default" : "secondary"}
-										className="mt-2"
-									>
-										{version.isPublished ? "Published" : "Draft"}
-									</Badge>
-								</div>
-							))}
-						</ScrollArea>
-					</TabsContent>
-				</Tabs>
-			</CardContent>
+			{/* <CardContent>
+				
+			</CardContent> */}
 			<CardFooter className="flex justify-between">
 				<Button variant={post.isPublished ? "secondary" : "default"}>
 					{post.isPublished ? "Unpublish" : "Publish"}
