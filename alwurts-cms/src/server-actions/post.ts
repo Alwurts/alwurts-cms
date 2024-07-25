@@ -13,9 +13,7 @@ export const getPosts = withAuthCheck(async () => {
 });
 
 export const createPost = withAuthCheck(async () => {
-	const newPost = await postsProxy.createPost({
-		isFeatured: false,
-	});
+	const newPost = await postsProxy.createPost({});
 
 	const newPostVersion = await postsVersionsProxy.createPostVersion({
 		postId: newPost.id,
@@ -31,7 +29,7 @@ export const createPost = withAuthCheck(async () => {
 		throw new Error("Failed to create post version");
 	}
 
-	await postsProxy.updatePost({
+	await postsProxy.updatePost(newPost.id, {
 		latestVersionId: newPostVersion.postVersion,
 	});
 

@@ -1,6 +1,7 @@
 import { db } from "@/database";
 import { posts } from "@/database/schema";
 import type { TCreatePost } from "@/types/database/post";
+import { eq } from "drizzle-orm";
 import "server-only";
 
 export const createPost = async (post: TCreatePost) => {
@@ -8,8 +9,12 @@ export const createPost = async (post: TCreatePost) => {
 	return result[0];
 };
 
-export const updatePost = async (post: TCreatePost) => {
-	const result = await db.update(posts).set(post).returning();
+export const updatePost = async (postId: string, post: TCreatePost) => {
+	const result = await db
+		.update(posts)
+		.set(post)
+		.where(eq(posts.id, postId))
+		.returning();
 	return result[0];
 };
 

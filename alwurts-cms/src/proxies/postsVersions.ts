@@ -3,7 +3,7 @@ import "server-only";
 import { db } from "@/database";
 import { postVersions, posts, postsVersionsToTags } from "@/database/schema";
 import type { TCreatePostVersion } from "@/types/database/postVersion";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 import * as filesProxy from "@/proxies/files";
 
 export const getLatestPostVersion = async (postId: string) => {
@@ -23,11 +23,60 @@ export const getLatestPostVersion = async (postId: string) => {
 	return latestPostVersion?.latestVersion;
 };
 
+export const getPublishedVersion = async (postId: string) => {
+	const publishedVersion = await db.query.posts.findFirst({
+		where: eq(posts.id, postId),
+		with: {
+			publishedVersion: {
+				with: {
+					imageLarge: true,
+					imageSmall: true,
+					tags: true,
+				},
+			},
+		},
+	});
+	return publishedVersion?.publishedVersion;
+};
+
 export const publishLatestVersion = async (postId: string) => {
 	const latestVersion = await getLatestPostVersion(postId);
-	const result = await db.update(posts).set({
-		publishedVersionId: latestVersion?.postVersion,
-	}).returning();
+
+	if (!latestVersion) {
+		throw new Error("No latest version found");
+	}
+
+	const result = await db
+		.update(posts)
+		.set({
+			publishedVersionId: latestVersion.postVersion,
+		})
+		.where(eq(posts.id, postId))
+		.returning();
+
+	await db
+		.update(postVersions)
+		.set({
+			publishedAt: new Date(),
+		})
+		.where(
+			and(
+				eq(postVersions.postId, postId),
+				eq(postVersions.postVersion, latestVersion.postVersion),
+			),
+		);
+	return result[0];
+};
+
+export const markPublishedVersionAsFeatured = async (postId: string) => {
+	const publishedVersion = await getPublishedVersion(postId);
+	const result = await db
+		.update(postVersions)
+		.set({
+			isFeatured: !publishedVersion?.isFeatured,
+		})
+		.where(eq(postVersions.postId, postId))
+		.returning();
 	return result[0];
 };
 
@@ -77,6 +126,10 @@ export const createPostVersion = async (newPostVersion: TCreatePostVersion) => {
 					newPostVersion.date instanceof Date
 						? newPostVersion.date
 						: new Date(newPostVersion.date),
+				publishedAt: currentPostVersion?.publishedAt
+					? new Date()
+					: null,
+				isFeatured: currentPostVersion?.isFeatured,
 			})
 			.returning();
 
@@ -94,9 +147,12 @@ export const createPostVersion = async (newPostVersion: TCreatePostVersion) => {
 			);
 		}
 
-		await tx.update(posts).set({
-			latestVersionId: newPostVersionId,
-		});
+		await tx
+			.update(posts)
+			.set({
+				latestVersionId: newPostVersionId,
+			})
+			.where(eq(posts.id, newPostResult[0].postId));
 
 		return newPostResult[0];
 	});

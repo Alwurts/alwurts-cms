@@ -20,7 +20,6 @@ export const posts = pgTable(
 	"posts",
 	{
 		id: uuid("id").primaryKey().defaultRandom(),
-		isFeatured: boolean("is_featured").notNull().default(false),
 		latestVersionId: integer("latest_version_id"),
 		publishedVersionId: integer("published_version_id"),
 	},
@@ -54,6 +53,7 @@ export const postVersions = pgTable(
 		imageLargeId: uuid("image_large_id").references(() => files.id),
 		imageSmallId: uuid("image_small_id").references(() => files.id),
 		publishedAt: timestamp("published_at"),
+		isFeatured: boolean("is_featured").notNull().default(false),
 		createdAt: timestamp("created_at").notNull(),
 	},
 	(table) => {

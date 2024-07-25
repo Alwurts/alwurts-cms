@@ -18,13 +18,16 @@ import {
 	ClockIcon,
 	ImageIcon,
 	Loader2Icon,
+	StarIcon,
 	TagIcon,
 	TextIcon,
 	User2Icon,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
-import { publishLatestVersion } from "@/server-actions/postVersions";
+import {
+	markPublishedVersionAsFeatured,
+	publishLatestVersion,
+} from "@/server-actions/postVersions";
 import type { TPostVersion } from "@/types/database/postVersion";
 import { useMutation } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
@@ -33,6 +36,8 @@ import {
 	CollapsibleContent,
 	CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { StarFilledIcon } from "@/components/icons/StartFilledIcon";
+import { StarOutlineIcon } from "@/components/icons/StartOutlineIcon";
 
 function PostCardContent({
 	post,
@@ -127,6 +132,10 @@ export default function PostCard({
 		mutationFn: publishLatestVersion,
 	});
 
+	const handleMarkPublishedVersionAsFeatured = useMutation({
+		mutationFn: markPublishedVersionAsFeatured,
+	});
+
 	return (
 		<Card className="w-full">
 			<CardHeader>
@@ -151,24 +160,29 @@ export default function PostCard({
 					)}
 				</div>
 			) : latestVersion ? (
-				<PostCardContent post={latestVersion} version="latest" />
+				<PostCardContent
+					post={latestVersion}
+					version="latest"
+					className="mx-4"
+				/>
 			) : null}
 			<CardFooter className="flex justify-start gap-2 mt-4">
-				{latestVersion && publishedVersion && (
+				{latestVersion && (
 					<Collapsible className="flex flex-col gap-3 items-start">
 						<div className="flex justify-start gap-2">
-							{latestVersion?.postVersion > publishedVersion?.postVersion && (
-								<CollapsibleTrigger
-									className={buttonVariants({
-										variant: "outline",
-										className: "",
-										size: "sm",
-									})}
-								>
-									See latest version
-									<ChevronDownIcon className="w-4 h-4" />
-								</CollapsibleTrigger>
-							)}
+							{publishedVersion &&
+								latestVersion?.postVersion > publishedVersion?.postVersion && (
+									<CollapsibleTrigger
+										className={buttonVariants({
+											variant: "outline",
+											className: "",
+											size: "sm",
+										})}
+									>
+										See latest version
+										<ChevronDownIcon className="w-4 h-4" />
+									</CollapsibleTrigger>
+								)}
 							<Button
 								size="sm"
 								disabled={
@@ -186,6 +200,21 @@ export default function PostCard({
 									"Publish latest version"
 								)}
 							</Button>
+							<Button
+								size="sm"
+								variant="outline"
+								onClick={() =>
+									handleMarkPublishedVersionAsFeatured.mutate(postId)
+								}
+							>
+								{handleMarkPublishedVersionAsFeatured.isPending ? (
+									<Loader2Icon className="w-4 h-4 mr-2 animate-spin" />
+								) : publishedVersion?.isFeatured ? (
+									<StarFilledIcon className="w-4 h-4 text-yellow-500" />
+								) : (
+									<StarOutlineIcon className="w-4 h-4" />
+								)}
+							</Button>
 							<Link
 								className={buttonVariants({ variant: "outline" })}
 								href={`/editor/${postId}`}
@@ -193,11 +222,12 @@ export default function PostCard({
 								Edit
 							</Link>
 						</div>
-						{latestVersion?.postVersion > publishedVersion?.postVersion && (
-							<CollapsibleContent>
-								<PostCardContent post={latestVersion} version="latest" />
-							</CollapsibleContent>
-						)}
+						{publishedVersion &&
+							latestVersion?.postVersion > publishedVersion?.postVersion && (
+								<CollapsibleContent>
+									<PostCardContent post={latestVersion} version="latest" />
+								</CollapsibleContent>
+							)}
 					</Collapsible>
 				)}
 			</CardFooter>

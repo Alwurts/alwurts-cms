@@ -15,6 +15,12 @@ export const publishLatestVersion = withAuthCheck(async (session, postId: string
 	return result;
 });
 
+export const markPublishedVersionAsFeatured = withAuthCheck(async (session, postId: string) => {
+	const result = await postsVersionsProxy.markPublishedVersionAsFeatured(postId);
+	revalidatePath("/editor");
+	return result;
+});
+
 export const createPostVersion = withAuthCheck(async (session, postFormData: FormData) => {
   console.log("postFormData", postFormData);
   const formData = Object.fromEntries(postFormData);
