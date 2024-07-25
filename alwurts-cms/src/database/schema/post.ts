@@ -20,6 +20,7 @@ export const posts = pgTable(
 	"posts",
 	{
 		id: uuid("id").primaryKey().defaultRandom(),
+		url: varchar("url", { length: 255 }).notNull(),
 		latestVersionId: integer("latest_version_id"),
 		publishedVersionId: integer("published_version_id"),
 	},
@@ -45,6 +46,7 @@ export const postVersions = pgTable(
 			.notNull()
 			.references(() => posts.id),
 		postVersion: integer("post_version").notNull(),
+		url: varchar("url", { length: 255 }).notNull(),
 		title: varchar("title", { length: 255 }).notNull(),
 		description: varchar("description", { length: 255 }).notNull(),
 		content: text("content").notNull(),

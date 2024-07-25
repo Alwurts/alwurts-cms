@@ -25,7 +25,6 @@ import type { TPostVersion } from "@/types/database/postVersion";
 import Image from "next/image";
 import { PostVersionSchema } from "@/zod/postVersion";
 
-
 export default function Editor({ post }: { post: TPostVersion }) {
 	const editorRef = useRef<MDXEditorMethods>(null);
 	const formRef = useRef<HTMLFormElement>(null);
@@ -44,6 +43,7 @@ export default function Editor({ post }: { post: TPostVersion }) {
 		resolver: zodResolver(PostVersionSchema),
 		defaultValues: {
 			postId: post.postId,
+			url: post.url,
 			title: post.title,
 			description: post.description,
 			content: post.content,
@@ -73,6 +73,7 @@ export default function Editor({ post }: { post: TPostVersion }) {
 		}
 		const formData = new FormData();
 		formData.append("postId", values.postId);
+		formData.append("url", values.url);
 		formData.append("title", values.title);
 		formData.append("description", values.description);
 		formData.append("content", content);
@@ -136,6 +137,19 @@ export default function Editor({ post }: { post: TPostVersion }) {
 										<FormLabel>Title</FormLabel>
 										<FormControl>
 											<Input placeholder="Post Title" {...field} />
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="url"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel>URL</FormLabel>
+										<FormControl>
+											<Input placeholder="Post URL" {...field} />
 										</FormControl>
 										<FormMessage />
 									</FormItem>

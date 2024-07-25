@@ -17,6 +17,7 @@ import {
 	ChevronDownIcon,
 	ClockIcon,
 	ImageIcon,
+	LinkIcon,
 	Loader2Icon,
 	StarIcon,
 	TagIcon,
@@ -60,9 +61,10 @@ function PostCardContent({
 			<div className="flex flex-col gap-4">
 				<div>
 					<div className="flex items-center space-x-2 text-sm">
-						<TextIcon className="w-4 h-4" />
-						<span>Title: {post.title}</span>
+						<LinkIcon className="w-4 h-4" />
+						<span>URL: {post.url}</span>
 					</div>
+
 					<div className="flex items-center space-x-2 text-sm">
 						<CalendarIcon className="w-4 h-4" />
 						<span>Date: {post.date.toDateString()}</span>
@@ -141,7 +143,7 @@ export default function PostCard({
 			<CardHeader>
 				<CardTitle className="flex justify-start items-center gap-2">
 					<span>
-						{publishedVersion ? publishedVersion.title : latestVersion?.title}
+						{publishedVersion ? publishedVersion.url : latestVersion?.url}
 					</span>
 					<Badge variant={publishedVersion ? "default" : "destructive"}>
 						{publishedVersion ? "Published" : "Not published"}

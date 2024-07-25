@@ -12,39 +12,10 @@ import {
 	CardHeader,
 	CardTitle,
 } from "./components/ui/card";
+import { getPublishedFeaturedPosts } from "@/server-actions/post";
 
-const featuredPosts = [
-	{
-		id: "1",
-		title: "Post 1",
-		author: "Alejandro Wurts",
-		publishedAt: "2021-01-01",
-		content: "This is the content of the post",
-	},
-	{
-		id: "2",
-		title: "Post 2",
-		author: "Alejandro Wurts",
-		publishedAt: "2021-01-01",
-		content: "This is the content of the post",
-	},
-	{
-		id: "3",
-		title: "Post 3",
-		author: "Alejandro Wurts",
-		publishedAt: "2021-01-01",
-		content: "This is the content of the post",
-	},
-	{
-		id: "4",
-		title: "Post 4",
-		author: "Alejandro Wurts",
-		publishedAt: "2021-01-01",
-		content: "This is the content of the post",
-	},
-];
-
-export default function Home() {
+export default async function Home() {
+	const featuredPosts = await getPublishedFeaturedPosts();
 	return (
 		<div className="max-w-5xl mx-auto text-xl">
 			<section className="h-[calc(100vh-5rem)] pb-24 flex flex-col items-center justify-center w-full space-y-10">
@@ -81,21 +52,33 @@ export default function Home() {
 					</p>
 				</div>
 				<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 w-full mt-8">
-					{featuredPosts.map((post) => (
+					{featuredPosts.slice(0, 4).map((post) => (
 						<Link
-							href={`/posts/${post.id}`}
-							key={post.id}
+							href={`/posts/${post.url}`}
+							key={post.postId}
 							className="border-[3px] border-input-alwurts rounded-[40px] bg-background-alwurts text-card-foreground hover:bg-accent-alwurts transition-transform hover:scale-[97%]"
 						>
-							<CardHeader className="pb-3">
-								<CardTitle>{post.title}</CardTitle>
-								<CardDescription className="text-lg text-primary-alwurts">
-									{new Date(post.publishedAt).toLocaleDateString()}
-								</CardDescription>
-							</CardHeader>
-							<CardContent>
-								<p>{post.content.substring(0, 100)}...</p>
-							</CardContent>
+							<div className="p-6">
+								{post.imageLarge?.url && (
+									<Image
+										src={post.imageLarge.url}
+										alt={post.title}
+										width={250}
+										height={250}
+										className="object-contain h-[250px] w-auto mb-4 mx-auto"
+									/>
+								)}
+								<h3 className="text-2xl font-bold">{post.title}</h3>
+								<h4 className="text-lg text-primary-alwurts">
+									{post.date.toLocaleDateString()}
+								</h4>
+								<p>
+									{post.description.length > 100
+										? `${post.description.substring(0, 100)}...`
+										: post.description}
+								</p>
+							</div>
+				
 						</Link>
 					))}
 				</div>

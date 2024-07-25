@@ -50,6 +50,7 @@ export const publishLatestVersion = async (postId: string) => {
 		.update(posts)
 		.set({
 			publishedVersionId: latestVersion.postVersion,
+			url: latestVersion.url,
 		})
 		.where(eq(posts.id, postId))
 		.returning();

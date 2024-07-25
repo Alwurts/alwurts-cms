@@ -1,11 +1,8 @@
 "use server";
 
-import { db } from "@/database";
 import { withAuthCheck } from "@/lib/auth";
 import * as postsProxy from "@/proxies/posts";
 import * as postsVersionsProxy from "@/proxies/postsVersions";
-import type { TUpdatePost } from "@/types/database/post";
-import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 export const getPosts = withAuthCheck(async () => {
@@ -13,10 +10,13 @@ export const getPosts = withAuthCheck(async () => {
 });
 
 export const createPost = withAuthCheck(async () => {
-	const newPost = await postsProxy.createPost({});
+	const newPost = await postsProxy.createPost({
+		url: `new-post-${new Date().getTime()}`,
+	});
 
 	const newPostVersion = await postsVersionsProxy.createPostVersion({
 		postId: newPost.id,
+		url: newPost.url,
 		title: "New Post",
 		description: "New Post Description",
 		content: "New Post Content",
@@ -31,7 +31,20 @@ export const createPost = withAuthCheck(async () => {
 
 	await postsProxy.updatePost(newPost.id, {
 		latestVersionId: newPostVersion.postVersion,
+		url: newPost.url,
 	});
 
 	redirect(`/editor/${newPost.id}`);
 });
+
+export const getPublishedPosts = async () => {
+	return await postsProxy.getPublishedPosts();
+};
+
+export const getPublishedFeaturedPosts = async () => {
+	return await postsProxy.getPublishedFeaturedPosts();
+};
+
+export const getPublishedPostByUrl = async (url: string) => {
+	return await postsProxy.getPublishedPostByUrl(url);
+};

@@ -1,7 +1,7 @@
 import { db } from "@/database";
 import { posts } from "@/database/schema";
 import type { TCreatePost } from "@/types/database/post";
-import { eq } from "drizzle-orm";
+import { and, eq, isNotNull } from "drizzle-orm";
 import "server-only";
 
 export const createPost = async (post: TCreatePost) => {
@@ -41,4 +41,44 @@ export const getPosts = async () => {
 	});
 	console.log("result", result);
 	return result;
+};
+
+export const getPublishedPosts = async () => {
+	const result = await db.query.posts.findMany({
+		where: isNotNull(posts.publishedVersionId),
+		with: {
+			publishedVersion: {
+				with: {
+					tags: true,
+					imageSmall: true,
+					imageLarge: true,
+				},
+			},
+		},
+	});
+	const publishedPosts = result.map((post) => post.publishedVersion);
+
+	const filteredPublishedPosts = publishedPosts.filter((post) => !!post);
+	return filteredPublishedPosts;
+};
+
+export const getPublishedPostByUrl = async (url: string) => {
+	const result = await db.query.posts.findFirst({
+		where: and(eq(posts.url, url), isNotNull(posts.publishedVersionId)),
+		with: {
+			publishedVersion: {
+				with: {
+					tags: true,
+					imageSmall: true,
+					imageLarge: true,
+				},
+			},
+		},
+	});
+	return result?.publishedVersion;
+};
+
+export const getPublishedFeaturedPosts = async () => {
+	const result = await getPublishedPosts();
+	return result.filter((post) => post.isFeatured);
 };
