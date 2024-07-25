@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 // input
 
 const buttonVariants = cva(
-	"rounded-[200px] dark:rounded-[200px] inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background-alwurts transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-alwurts focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+	"rounded-full dark:rounded-full inline-flex items-center justify-center whitespace-nowrap text-sm font-medium ring-offset-background-alwurts transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-alwurts focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
 	{
 		variants: {
 			variant: {

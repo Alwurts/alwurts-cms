@@ -18,7 +18,7 @@ export default async function CMSPostsPage() {
 				<CreateButton />
 			</div>
 			<div className="flex flex-col space-y-6">
-				{posts.map((post) => (
+				{posts?.map((post) => (
 					<PostCard key={post.id} post={post} />
 				))}
 			</div>

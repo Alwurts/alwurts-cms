@@ -1,28 +1,34 @@
 import "server-only";
 
 import { db } from "@/database";
-import { postVersions, postsVersionsToTags } from "@/database/schema";
+import { postVersions, posts, postsVersionsToTags } from "@/database/schema";
 import type { TCreatePostVersion } from "@/types/database/postVersion";
 import { eq, desc } from "drizzle-orm";
-import { uploadImage } from "@/lib/s3";
 import * as filesProxy from "@/proxies/files";
 
-export const getPostsVersions = async (postId: string) => {
-	return db.select().from(postVersions).where(eq(postVersions.postId, postId));
-};
-
 export const getLatestPostVersion = async (postId: string) => {
-	const latestPostVersion = await db.query.postVersions.findFirst({
-		where: eq(postVersions.postId, postId),
-		orderBy: desc(postVersions.postVersion),
+	const latestPostVersion = await db.query.posts.findFirst({
+		where: eq(posts.id, postId),
 		with: {
-			tags: true,
-			imageLarge: true,
-			imageSmall: true,
+			latestVersion: {
+				with: {
+					imageLarge: true,
+					imageSmall: true,
+					tags: true,
+				},
+			},
 		},
 	});
 
-	return latestPostVersion;
+	return latestPostVersion?.latestVersion;
+};
+
+export const publishLatestVersion = async (postId: string) => {
+	const latestVersion = await getLatestPostVersion(postId);
+	const result = await db.update(posts).set({
+		publishedVersionId: latestVersion?.postVersion,
+	}).returning();
+	return result[0];
 };
 
 export const createPostVersion = async (newPostVersion: TCreatePostVersion) => {
@@ -57,7 +63,7 @@ export const createPostVersion = async (newPostVersion: TCreatePostVersion) => {
 			currentPostVersion?.imageSmallId,
 		);
 
-		const newPostResult = await db
+		const newPostResult = await tx
 			.insert(postVersions)
 			.values({
 				...newPostVersionWithoutTags,
@@ -79,7 +85,7 @@ export const createPostVersion = async (newPostVersion: TCreatePostVersion) => {
 		console.log("tags", tags);
 
 		if (tags.length > 0) {
-			await db.insert(postsVersionsToTags).values(
+			await tx.insert(postsVersionsToTags).values(
 				tags.map((tag) => ({
 					postId: newPostVersionWithoutTags.postId,
 					postVersion: newPostVersionId,
@@ -88,6 +94,10 @@ export const createPostVersion = async (newPostVersion: TCreatePostVersion) => {
 			);
 		}
 
-		return newPostResult;
+		await tx.update(posts).set({
+			latestVersionId: newPostVersionId,
+		});
+
+		return newPostResult[0];
 	});
 };

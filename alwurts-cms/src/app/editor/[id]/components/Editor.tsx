@@ -24,32 +24,7 @@ import { createPostVersion } from "@/server-actions/postVersions";
 import type { TPostVersion } from "@/types/database/postVersion";
 import Image from "next/image";
 import { PostVersionSchema } from "@/zod/postVersion";
-import { convertToFormData } from "@/lib/form";
-import { Separator } from "@/components/ui/separator";
 
-function extractDimensionsFromFilename(filename: string): {
-	width: number;
-	height: number;
-} {
-	const match = filename.match(/(\d+)x(\d+)(?=\.[^.]+$)/);
-	if (match) {
-		return {
-			width: Number.parseInt(match[1], 10),
-			height: Number.parseInt(match[2], 10),
-		};
-	}
-	return { width: 200, height: 200 }; // Default dimensions if not found
-}
-
-const getImageDimensions = (image: string | File) => {
-	if (typeof image === "string") {
-		return extractDimensionsFromFilename(image);
-	}
-	if (image instanceof File) {
-		return extractDimensionsFromFilename(image.name);
-	}
-	return { width: 200, height: 200 };
-};
 
 export default function Editor({ post }: { post: TPostVersion }) {
 	const editorRef = useRef<MDXEditorMethods>(null);

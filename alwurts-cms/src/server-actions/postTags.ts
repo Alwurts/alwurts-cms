@@ -1,21 +1,18 @@
 "use server";
 
+import { withAuthCheck } from "@/lib/auth";
 import * as postTagsProxy from "@/proxies/postTags";
 import type { TCreatePostTag } from "@/types/database/postTags";
 import { z } from "zod";
 
-export async function getPostTags() {
-	return await postTagsProxy.getPostTags();
-}
-
-export async function getPostTagsFilter(filter: string) {
+export const getPostTagsFilter = withAuthCheck(async (session, filter: string) => {
 	if (filter.length === 0) {
 		return await postTagsProxy.getPostTags();
 	}
 	return await postTagsProxy.getPostTagsFilter(filter);
-}
+});
 
-export async function createPostTag(postTag: TCreatePostTag) {
+export const createPostTag = withAuthCheck(async (session, postTag: TCreatePostTag) => {
 	const zodTag = z.object({
 		name: z.string(),
 	});
@@ -23,4 +20,4 @@ export async function createPostTag(postTag: TCreatePostTag) {
 	return await postTagsProxy.createPostTag({
 		name: tag.name.toLowerCase(),
 	});
-}
+});

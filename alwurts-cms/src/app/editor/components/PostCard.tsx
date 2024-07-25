@@ -10,67 +10,196 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Image from "next/image";
 import type { TPost } from "@/types/database/post";
-import { CalendarIcon, ClockIcon, TagIcon } from "lucide-react";
+import {
+	CalendarIcon,
+	ChevronDownIcon,
+	ClockIcon,
+	ImageIcon,
+	Loader2Icon,
+	TagIcon,
+	TextIcon,
+	User2Icon,
+} from "lucide-react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { publishLatestVersion } from "@/server-actions/postVersions";
+import type { TPostVersion } from "@/types/database/postVersion";
+import { useMutation } from "@tanstack/react-query";
+import { cn } from "@/lib/utils";
+import {
+	Collapsible,
+	CollapsibleContent,
+	CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
-export default function PostCard({ post }: { post: TPost }) {
-	const [activeTab, setActiveTab] = useState("current");
-	const [isExpanded, setIsExpanded] = useState(false);
-
-	const truncatedContent =
-		post.content.slice(0, 150) + (post.content.length > 150 ? "..." : "");
-
+function PostCardContent({
+	post,
+	version,
+	className,
+}: {
+	post: TPostVersion;
+	version: "published" | "latest";
+	className?: string;
+}) {
 	return (
-		<Card className="w-full">
-			<CardHeader>
-				<CardTitle className="flex justify-between items-center">
-					<span>{post.title}</span>
-					<Badge variant={post.isPublished ? "default" : "secondary"}>
-						{post.isPublished ? "Published" : "Draft"}
-					</Badge>
-				</CardTitle>
-				<CardDescription>
-					<div className="flex items-center space-x-2 mb-2">
-						<CalendarIcon className="w-4 h-4" />
-						<span>Created: {new Date(post.createdAt).toLocaleString()}</span>
-						{post.publishedAt && (
-							<>
-								<ClockIcon className="w-4 h-4 ml-2" />
-								<span>
-									Published: {new Date(post.publishedAt).toLocaleString()}
-								</span>
-							</>
-						)}
+		<CardContent
+			className={cn(className, "space-y-1 p-4 border-2 rounded-md", {
+				"border-dashed": version === "latest",
+			})}
+		>
+			<h3 className="text-base font-medium capitalize">
+				{`${version}: ${post.postVersion}`}
+			</h3>
+			<div className="flex flex-col gap-4">
+				<div>
+					<div className="flex items-center space-x-2 text-sm">
+						<TextIcon className="w-4 h-4" />
+						<span>Title: {post.title}</span>
 					</div>
-					<div className="flex items-center space-x-2">
-						<span>By: {post.author}</span>
-						<TagIcon className="w-4 h-4 ml-2" />
+					<div className="flex items-center space-x-2 text-sm">
+						<CalendarIcon className="w-4 h-4" />
+						<span>Date: {post.date.toDateString()}</span>
+					</div>
+					<div className="flex items-center space-x-2 text-sm">
+						<User2Icon className="w-4 h-4" />
+						<span>Author: {post.author}</span>
+					</div>
+
+					<div className="flex items-center space-x-2 text-sm">
+						<TagIcon className="w-4 h-4" />
 						{post.tags.map((tag) => (
 							<Badge key={tag.tagName} variant="outline">
 								{tag.tagName}
 							</Badge>
 						))}
 					</div>
-				</CardDescription>
+				</div>
+				<div className="flex gap-4">
+					<div className="flex flex-col items-start gap-2">
+						<div className="flex items-center space-x-2 text-sm">
+							<ImageIcon className="w-4 h-4" />
+							<h4>Image small</h4>
+						</div>
+						{post.imageSmall ? (
+							<Image
+								src={post.imageSmall.url ?? ""}
+								alt={post.imageSmall.description ?? ""}
+								width={150}
+								height={150}
+								className="object-contain h-[150px] w-auto border-2 border-stone-400 rounded-md"
+							/>
+						) : (
+							<div>No image small</div>
+						)}
+					</div>
+					<div className="flex flex-col items-start gap-2">
+						<div className="flex items-center space-x-2 text-sm">
+							<ImageIcon className="w-4 h-4" />
+							<h4>Image large</h4>
+						</div>
+						{post.imageLarge ? (
+							<Image
+								src={post.imageLarge.url ?? ""}
+								alt={post.imageLarge.description ?? ""}
+								width={150}
+								height={150}
+								className="object-contain h-[150px] w-auto border-2 border-stone-400 rounded-md"
+							/>
+						) : (
+							<div>No image small</div>
+						)}
+					</div>
+				</div>
+			</div>
+		</CardContent>
+	);
+}
+
+export default function PostCard({
+	post: { id: postId, publishedVersion, latestVersion },
+}: { post: TPost }) {
+	console.log("publishedVersion", publishedVersion);
+	console.log("latestVersion", latestVersion);
+
+	const handlePublishLatestVersion = useMutation({
+		mutationFn: publishLatestVersion,
+	});
+
+	return (
+		<Card className="w-full">
+			<CardHeader>
+				<CardTitle className="flex justify-start items-center gap-2">
+					<span>
+						{publishedVersion ? publishedVersion.title : latestVersion?.title}
+					</span>
+					<Badge variant={publishedVersion ? "default" : "destructive"}>
+						{publishedVersion ? "Published" : "Not published"}
+					</Badge>
+				</CardTitle>
 			</CardHeader>
-			{/* <CardContent>
-				
-			</CardContent> */}
-			<CardFooter className="flex justify-between">
-				<Button variant={post.isPublished ? "secondary" : "default"}>
-					{post.isPublished ? "Unpublish" : "Publish"}
-				</Button>
-				<Link
-					className={buttonVariants({ variant: "outline" })}
-					href={`/editor/${post.id}`}
-				>
-					Edit
-				</Link>
+			{publishedVersion && latestVersion ? (
+				<div className="flex flex-col gap-2">
+					<PostCardContent
+						post={publishedVersion}
+						version="published"
+						className="mx-4"
+					/>
+					{publishedVersion.postVersion < latestVersion.postVersion && (
+						<span className="text-destructive px-6 mt-3">{`Published version is ${latestVersion.postVersion - publishedVersion.postVersion} version${latestVersion.postVersion - publishedVersion.postVersion > 1 ? "s" : ""} behind latest version`}</span>
+					)}
+				</div>
+			) : latestVersion ? (
+				<PostCardContent post={latestVersion} version="latest" />
+			) : null}
+			<CardFooter className="flex justify-start gap-2 mt-4">
+				{latestVersion && publishedVersion && (
+					<Collapsible className="flex flex-col gap-3 items-start">
+						<div className="flex justify-start gap-2">
+							{latestVersion?.postVersion > publishedVersion?.postVersion && (
+								<CollapsibleTrigger
+									className={buttonVariants({
+										variant: "outline",
+										className: "",
+										size: "sm",
+									})}
+								>
+									See latest version
+									<ChevronDownIcon className="w-4 h-4" />
+								</CollapsibleTrigger>
+							)}
+							<Button
+								size="sm"
+								disabled={
+									handlePublishLatestVersion.isPending ||
+									publishedVersion?.postVersion === latestVersion?.postVersion
+								}
+								onClick={() => handlePublishLatestVersion.mutate(postId)}
+							>
+								{handlePublishLatestVersion.isPending ? (
+									<Loader2Icon className="w-4 h-4 mr-2 animate-spin" />
+								) : publishedVersion?.postVersion ===
+									latestVersion?.postVersion ? (
+									"Latest version is published"
+								) : (
+									"Publish latest version"
+								)}
+							</Button>
+							<Link
+								className={buttonVariants({ variant: "outline" })}
+								href={`/editor/${postId}`}
+							>
+								Edit
+							</Link>
+						</div>
+						{latestVersion?.postVersion > publishedVersion?.postVersion && (
+							<CollapsibleContent>
+								<PostCardContent post={latestVersion} version="latest" />
+							</CollapsibleContent>
+						)}
+					</Collapsible>
+				)}
 			</CardFooter>
 		</Card>
 	);

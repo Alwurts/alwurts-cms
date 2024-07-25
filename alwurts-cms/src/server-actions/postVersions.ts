@@ -1,18 +1,21 @@
 "use server";
 
+import { withAuthCheck } from "@/lib/auth";
 import * as postsVersionsProxy from "@/proxies/postsVersions";
 import { PostVersionSchema } from "@/zod/postVersion";
 import { revalidatePath } from "next/cache";
 
-export async function getPostsVersions(postId: string) {
-	return await postsVersionsProxy.getPostsVersions(postId);
-}
-
-export async function getLatestPostVersion(postId: string) {
+export const getLatestPostVersion = withAuthCheck(async (session, postId: string) => {
 	return await postsVersionsProxy.getLatestPostVersion(postId);
-}
+});
 
-export async function createPostVersion(postFormData: FormData) {
+export const publishLatestVersion = withAuthCheck(async (session, postId: string) => {
+	const result = await postsVersionsProxy.publishLatestVersion(postId);
+	revalidatePath("/editor");
+	return result;
+});
+
+export const createPostVersion = withAuthCheck(async (session, postFormData: FormData) => {
   console.log("postFormData", postFormData);
   const formData = Object.fromEntries(postFormData);
   const newPostVersion = PostVersionSchema.parse(formData);
@@ -26,5 +29,5 @@ export async function createPostVersion(postFormData: FormData) {
   });
 
   revalidatePath(`/editor/${newPostVersion.postId}`);
-  revalidatePath("/editor");
-}
+	revalidatePath("/editor");
+});

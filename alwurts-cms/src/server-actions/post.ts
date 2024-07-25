@@ -1,42 +1,39 @@
 "use server";
 
 import { db } from "@/database";
+import { withAuthCheck } from "@/lib/auth";
 import * as postsProxy from "@/proxies/posts";
 import * as postsVersionsProxy from "@/proxies/postsVersions";
 import type { TUpdatePost } from "@/types/database/post";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-export async function getPosts() {
+export const getPosts = withAuthCheck(async () => {
 	return await postsProxy.getPosts();
-}
+});
 
-export async function getPost(id: string) {
-	return await postsProxy.getPost(id);
-}
-
-export async function createPost() {
-	const newPostTransaction = await db.transaction(async (tx) => {
-		const newPost = await postsProxy.createPost({
-			title: "New Post",
-			description: "New Post Description",
-			content: "New Post Content",
-			author: "Alwurts",
-			date: new Date(),
-		});
-
-		await postsVersionsProxy.createPostVersion({
-			postId: newPost.id,
-			title: newPost.title,
-			description: newPost.description,
-			content: newPost.content,
-			author: newPost.author,
-			date: newPost.date,
-			tags: [],
-		});
-
-		return newPost;
+export const createPost = withAuthCheck(async () => {
+	const newPost = await postsProxy.createPost({
+		isFeatured: false,
 	});
 
-	redirect(`/editor/${newPostTransaction.id}`);
-}
+	const newPostVersion = await postsVersionsProxy.createPostVersion({
+		postId: newPost.id,
+		title: "New Post",
+		description: "New Post Description",
+		content: "New Post Content",
+		author: "Alwurts",
+		date: new Date(),
+		tags: [],
+	});
+
+	if (!newPostVersion) {
+		throw new Error("Failed to create post version");
+	}
+
+	await postsProxy.updatePost({
+		latestVersionId: newPostVersion.postVersion,
+	});
+
+	redirect(`/editor/${newPost.id}`);
+});

@@ -10,13 +10,13 @@ export default {
 	session: { strategy: "jwt" },
 	callbacks: {
 		async jwt({ token, user }) {
-			/* if (user) {
+			if (user) {
 				token.user_id = user.id;
-			} */
+			}
 			return token;
 		},
 		async session({ session, token }) {
-			/* session.user.id = token.user_id as string; */
+			session.user.id = token.user_id as string;
 			return session;
 		},
 	},

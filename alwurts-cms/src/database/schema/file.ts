@@ -21,8 +21,6 @@ export const files = pgTable("files", {
 });
 
 export const filesRelations = relations(files, ({ many }) => ({
-	postsImageLarge: many(posts, { relationName: "imageLarge" }),
-	postsImageSmall: many(posts, { relationName: "imageSmall" }),
 	postVersionsImageLarge: many(postVersions, { relationName: "imageLarge" }),
 	postVersionsImageSmall: many(postVersions, { relationName: "imageSmall" }),
 }));

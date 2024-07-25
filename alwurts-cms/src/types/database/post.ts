@@ -8,6 +8,20 @@ export type TPost = InferQueryModel<
 	{
 		tags: true;
 		versions: true;
+		publishedVersion: {
+			with: {
+				imageLarge: true;
+				imageSmall: true;
+				tags: true;
+			};
+		};
+		latestVersion: {
+			with: {
+				imageLarge: true;
+				imageSmall: true;
+				tags: true;
+			};
+		};
 	}
 >;
 
