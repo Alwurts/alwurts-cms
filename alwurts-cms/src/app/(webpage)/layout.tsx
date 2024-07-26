@@ -32,7 +32,12 @@ export default async function WebpageLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<div className="bg-background-alwurts text-foreground-alwurts">
+		<div
+			className={cn(
+				"bg-background-alwurts text-foreground-alwurts flex flex-col min-h-screen",
+				roboto.className,
+			)}
+		>
 			<nav className="fixed inset-x-0 top-0 z-50 bg-background-alwurts/80 backdrop-blur-sm h-fit">
 				<div className="mx-auto px-6 md:px-12 flex justify-between max-w-6xl h-20 py-3">
 					<Logo className="w-auto h-auto" />
@@ -56,8 +61,8 @@ export default async function WebpageLayout({
 					</div>
 				</div>
 			</nav>
-			<main className={cn("pt-20", roboto.className)}>{children}</main>
-			<footer className="bg-background-alwurts flex flex-col items-center space-y-6 py-14">
+			<main className={cn("pt-20")}>{children}</main>
+			<footer className="bg-background-alwurts flex flex-col items-center space-y-6 py-14 mt-auto">
 				<div className="flex items-center justify-center space-x-3">
 					<Link
 						className={buttonVariants({ variant: "outline", size: "icon" })}

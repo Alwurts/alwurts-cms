@@ -24,6 +24,8 @@ import { createPostVersion } from "@/server-actions/postVersions";
 import type { TPostVersion } from "@/types/database/postVersion";
 import Image from "next/image";
 import { PostVersionSchema } from "@/zod/postVersion";
+import { LinksFetch } from "@/components/LinksFetch";
+import type { Link } from "@/zod/postLinks";
 
 export default function Editor({ post }: { post: TPostVersion }) {
 	const editorRef = useRef<MDXEditorMethods>(null);
@@ -58,6 +60,8 @@ export default function Editor({ post }: { post: TPostVersion }) {
 			imageLargeDescription: post.imageLarge?.description || "",
 			imageSmall: undefined,
 			imageSmallDescription: post.imageSmall?.description || "",
+			links:
+				typeof post.links === "string" ? JSON.parse(post.links) : post.links,
 		},
 	});
 
@@ -98,6 +102,8 @@ export default function Editor({ post }: { post: TPostVersion }) {
 		if (values.imageSmallDescription) {
 			formData.append("imageSmallDescription", values.imageSmallDescription);
 		}
+
+		formData.append("links", JSON.stringify(values.links));
 
 		console.log("formData", formData.entries());
 		savePostVersion.mutate(formData);
@@ -223,6 +229,22 @@ export default function Editor({ post }: { post: TPostVersion }) {
 													field.value.length > 0 ? field.value.split(",") : []
 												}
 												setFieldValue={(tags) => field.onChange(tags.join(","))}
+											/>
+										</FormControl>
+										<FormMessage />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="links"
+								render={({ field }) => (
+									<FormItem className="col-span-2">
+										<FormLabel>Links</FormLabel>
+										<FormControl>
+											<LinksFetch
+												fieldValue={field.value as Link[]}
+												setFieldValue={field.onChange}
 											/>
 										</FormControl>
 										<FormMessage />

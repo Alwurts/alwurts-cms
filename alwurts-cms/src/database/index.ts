@@ -19,4 +19,4 @@ const client = postgres({
 	ssl: false,
 });
 
-export const db = drizzle(client, { schema: schema, logger: true });
+export const db = drizzle(client, { schema: schema/* , logger: true */ });

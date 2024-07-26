@@ -12,19 +12,17 @@ import {
 	time,
 	uuid,
 	varchar,
+	jsonb,
 } from "drizzle-orm/pg-core";
 import { postsToTags, postsVersionsToTags } from "./postTags";
 import { files } from "./file";
 
-export const posts = pgTable(
-	"posts",
-	{
-		id: uuid("id").primaryKey().defaultRandom(),
-		url: varchar("url", { length: 255 }).notNull(),
-		latestVersionId: integer("latest_version_id"),
-		publishedVersionId: integer("published_version_id"),
-	},
-);
+export const posts = pgTable("posts", {
+	id: uuid("id").primaryKey().defaultRandom(),
+	url: varchar("url", { length: 255 }).notNull(),
+	latestVersionId: integer("latest_version_id"),
+	publishedVersionId: integer("published_version_id"),
+});
 
 export const postsRelations = relations(posts, ({ many, one }) => ({
 	tags: many(postsToTags),
@@ -47,6 +45,7 @@ export const postVersions = pgTable(
 			.references(() => posts.id),
 		postVersion: integer("post_version").notNull(),
 		url: varchar("url", { length: 255 }).notNull(),
+		links: jsonb("links"),
 		title: varchar("title", { length: 255 }).notNull(),
 		description: varchar("description", { length: 255 }).notNull(),
 		content: text("content").notNull(),
