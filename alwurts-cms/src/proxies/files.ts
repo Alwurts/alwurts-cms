@@ -20,7 +20,7 @@ export const handleImageUpdate = async (
 	return currentImageId;
 };
 
-export const createImageFile = async (imageFile: File, description: string) => {
+export const createImageFile = async (imageFile: File, description: string | undefined = undefined) => {
 	const { imageUrl, imageName, imageSize, mimeType } =
 		await uploadImage(imageFile);
 
@@ -33,7 +33,7 @@ export const createImageFile = async (imageFile: File, description: string) => {
 		.values({
 			name: imageName,
 			type: mimeType,
-			description: description,
+			description: description ?? "No description",
 			url: imageUrl,
 			date: new Date().toISOString(),
 			size: imageSize,

@@ -93,7 +93,7 @@ export default async function Page({ params }: { params: { url: string } }) {
 	}
 
 	return (
-		<div className="max-w-3xl mx-auto py-8 space-y-7 flex flex-col items-stretch">
+		<div className="max-w-4xl mx-auto py-8 space-y-7 flex flex-col items-stretch">
 			<div className="space-y-2">
 				<h1 className="text-5xl font-bold">{post.title}</h1>
 				<p className="ml-2 text-muted-foreground-alwurts">

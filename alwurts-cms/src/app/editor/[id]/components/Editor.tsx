@@ -121,7 +121,7 @@ export default function Editor({ post }: { post: TPostVersion }) {
 
 	return (
 		<CardLayout
-			classname="max-w-6xl mx-auto"
+			classname="max-w-4xl mx-auto"
 			cardHeaderContent={
 				<Form {...form}>
 					<form

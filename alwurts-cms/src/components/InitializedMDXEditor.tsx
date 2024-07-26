@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { uploadImage } from "@/server-actions/file";
 import {
 	MDXEditor,
 	headingsPlugin,
@@ -34,12 +35,17 @@ import {
 	ConditionalContents,
 	diffSourcePlugin,
 } from "@mdxeditor/editor";
+import { useMutation } from "@tanstack/react-query";
 import type { ForwardedRef } from "react";
 
 export default function InitializedMDXEditor({
 	editorRef,
 	...props
 }: { editorRef: ForwardedRef<MDXEditorMethods> | null } & MDXEditorProps) {
+	const uploadImageMutation = useMutation({
+		mutationFn: uploadImage,
+	});
+
 	return (
 		<MDXEditor
 			plugins={[
@@ -66,15 +72,19 @@ export default function InitializedMDXEditor({
 					diffMarkdown: "An older version",
 					viewMode: "rich-text",
 				}),
-				/* imagePlugin({
-					imageUploadHandler: () => {
-						return Promise.resolve("https://picsum.photos/200/300");
+				imagePlugin({
+					imageUploadHandler: async (image) => {
+						console.log("image", image);
+						const formData = new FormData();
+						formData.append("image", image);
+						console.log("formData", formData);
+						const imageUrl = await uploadImageMutation.mutateAsync(formData);
+						if (!imageUrl) {
+							throw new Error("Failed to upload image");
+						}
+						return imageUrl;
 					},
-					imageAutocompleteSuggestions: [
-						"https://picsum.photos/200/300",
-						"https://picsum.photos/200",
-					],
-				}), */
+				}),
 				toolbarPlugin({
 					toolbarContents: () => (
 						<ConditionalContents
@@ -86,9 +96,9 @@ export default function InitializedMDXEditor({
 								{
 									fallback: () => (
 										<>
-											<DiffSourceToggleWrapper options={
-												['rich-text', 'source']
-											}>
+											<DiffSourceToggleWrapper
+												options={["rich-text", "source"]}
+											>
 												<UndoRedo />
 												<Separator />
 												<BoldItalicUnderlineToggles />
@@ -101,7 +111,7 @@ export default function InitializedMDXEditor({
 												<CreateLink />
 												<InsertCodeBlock />
 												<Separator />
-												{/* <InsertImage /> */}
+												<InsertImage />
 											</DiffSourceToggleWrapper>
 										</>
 									),
