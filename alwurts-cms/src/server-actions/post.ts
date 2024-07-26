@@ -4,6 +4,8 @@ import { withAuthCheck } from "@/lib/auth";
 import * as postsProxy from "@/proxies/posts";
 import * as postsVersionsProxy from "@/proxies/postsVersions";
 import { redirect } from "next/navigation";
+import { cache } from "react";
+import { unstable_cache } from "next/cache";
 
 export const getPosts = withAuthCheck(async () => {
 	return await postsProxy.getPosts();
@@ -37,14 +39,26 @@ export const createPost = withAuthCheck(async () => {
 	redirect(`/editor/${newPost.id}`);
 });
 
-export const getPublishedPosts = async () => {
-	return await postsProxy.getPublishedPosts();
-};
+export const getPublishedPosts = unstable_cache(
+	postsProxy.getPublishedPosts,
+	["getPublishedPosts"],
+	{
+		revalidate: 40,
+	},
+);
 
-export const getPublishedFeaturedPosts = async () => {
-	return await postsProxy.getPublishedFeaturedPosts();
-};
+export const getPublishedFeaturedPosts = unstable_cache(
+	postsProxy.getPublishedFeaturedPosts,
+	["getPublishedFeaturedPosts"],
+	{
+		revalidate: 40,
+	},
+);
 
-export const getPublishedPostByUrl = async (url: string) => {
-	return await postsProxy.getPublishedPostByUrl(url);
-};
+export const getPublishedPostByUrl = unstable_cache(
+	postsProxy.getPublishedPostByUrl,
+	["getPublishedPostByUrl"],
+	{
+		revalidate: 30,
+	},
+);

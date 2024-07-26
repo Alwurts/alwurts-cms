@@ -1,18 +1,11 @@
 import Link from "next/link";
-import { Badge } from "./components/ui/badge";
-import { Button, buttonVariants } from "./components/ui/button";
-import { Input } from "./components/ui/input";
+import { buttonVariants } from "./components/ui/button";
 import Image from "next/image";
 import { HoverImage } from "./components/HoverImage";
 import { TypewriterText } from "./components/TypewriterText";
-import {
-	Card,
-	CardContent,
-	CardDescription,
-	CardHeader,
-	CardTitle,
-} from "./components/ui/card";
 import { getPublishedFeaturedPosts } from "@/server-actions/post";
+
+export const revalidate = 60;
 
 export default async function Home() {
 	const featuredPosts = await getPublishedFeaturedPosts();
@@ -70,7 +63,7 @@ export default async function Home() {
 								)}
 								<h3 className="text-2xl font-bold">{post.title}</h3>
 								<h4 className="text-lg text-primary-alwurts">
-									{post.date.toLocaleDateString()}
+									{new Date(post.date).toLocaleDateString()}
 								</h4>
 								<p>
 									{post.description.length > 100

@@ -34,7 +34,7 @@ export default async function WebpageLayout({
 	return (
 		<div className="bg-background-alwurts text-foreground-alwurts">
 			<nav className="fixed inset-x-0 top-0 z-50 bg-background-alwurts/80 backdrop-blur-sm h-fit">
-				<div className="mx-auto px-6 md:px-12 flex justify-between max-w-5xl h-20 py-3">
+				<div className="mx-auto px-6 md:px-12 flex justify-between max-w-6xl h-20 py-3">
 					<Logo className="w-auto h-auto" />
 					<div className="flex items-center space-x-8">
 						<div className="flex items-center space-x-4">
