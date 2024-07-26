@@ -19,12 +19,10 @@ export function LinksFetch({
 	fieldValue,
 	setFieldValue,
 }: {
-	fieldValue: Link[] | undefined;
+	fieldValue: Link[] | null;
 	setFieldValue: (value: Link[]) => void;
 }) {
 	const [isOpen, setOpen] = useState(false);
-
-	console.log("fieldValue", fieldValue);
 
 	const form = useForm<Link>({
 		resolver: zodResolver(linkSchema),
@@ -34,9 +32,14 @@ export function LinksFetch({
 		},
 	});
 
+	console.log("fieldValue", fieldValue);
+
 	function onSubmit(values: Link) {
-		if (!fieldValue) return;
-		setFieldValue([...fieldValue, values]);
+		if (!fieldValue) {
+			setFieldValue([values]);
+		} else {
+			setFieldValue([...fieldValue, values]);
+		}
 		form.reset();
 	}
 

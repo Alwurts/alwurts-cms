@@ -7,7 +7,6 @@ import { z } from "zod";
 export const uploadImage = withAuthCheck(
 	async (session, formData: FormData) => {
 		const imageFormData = Object.fromEntries(formData);
-		console.log("imageFormData", imageFormData);
 		const zFile = z.object({
 			image: z.instanceof(File),
 			description: z.string().optional(),

@@ -127,8 +127,6 @@ function PostCardContent({
 export default function PostCard({
 	post: { id: postId, publishedVersion, latestVersion },
 }: { post: TPost }) {
-	console.log("publishedVersion", publishedVersion);
-	console.log("latestVersion", latestVersion);
 
 	const handlePublishLatestVersion = useMutation({
 		mutationFn: publishLatestVersion,

@@ -82,67 +82,62 @@ export const markPublishedVersionAsFeatured = async (postId: string) => {
 };
 
 export const createPostVersion = async (newPostVersion: TCreatePostVersion) => {
-	const {
-		tags,
-		imageLarge,
-		imageSmall,
-		imageLargeDescription,
-		imageSmallDescription,
-		...newPostVersionWithoutTags
-	} = newPostVersion;
+	const { tags, ...newPostVersionRest } = newPostVersion;
 
 	return db.transaction(async (tx) => {
-		const currentPostVersions = await tx
+		const previousPostVersions = await tx
 			.select()
 			.from(postVersions)
-			.where(eq(postVersions.postId, newPostVersionWithoutTags.postId))
+			.where(eq(postVersions.postId, newPostVersionRest.postId))
 			.orderBy(desc(postVersions.postVersion))
 			.limit(1);
 
-		const currentPostVersion = currentPostVersions[0];
+		const previousLatestPostVersion = previousPostVersions[0];
 
 		const imageLargeId = await filesProxy.handleImageUpdate(
-			imageLarge,
-			imageLargeDescription,
-			currentPostVersion?.imageLargeId,
+			newPostVersionRest.imageLarge,
+			newPostVersionRest.imageLargeDescription,
+			previousLatestPostVersion?.imageLargeId,
 		);
 
 		const imageSmallId = await filesProxy.handleImageUpdate(
-			imageSmall,
-			imageSmallDescription,
-			currentPostVersion?.imageSmallId,
+			newPostVersionRest.imageSmall,
+			newPostVersionRest.imageSmallDescription,
+			previousLatestPostVersion?.imageSmallId,
 		);
 
 		const newPostResult = await tx
 			.insert(postVersions)
 			.values({
-				...newPostVersionWithoutTags,
-				imageLargeId: imageLargeId ?? currentPostVersion?.imageLargeId,
-				imageSmallId: imageSmallId ?? currentPostVersion?.imageSmallId,
-				postVersion: currentPostVersion
-					? currentPostVersion.postVersion + 1
+				...newPostVersionRest,
+				postVersion: previousLatestPostVersion
+					? previousLatestPostVersion.postVersion + 1
 					: 1,
-				createdAt: new Date(),
+				links:
+					typeof newPostVersionRest.links === "string"
+						? JSON.parse(newPostVersionRest.links)
+						: newPostVersionRest.links,
+				isFeatured: previousLatestPostVersion?.isFeatured,
+				imageLargeId: imageLargeId ?? previousLatestPostVersion?.imageLargeId,
+				imageSmallId: imageSmallId ?? previousLatestPostVersion?.imageSmallId,
 				date:
-					newPostVersion.date instanceof Date
-						? newPostVersion.date
-						: new Date(newPostVersion.date),
-				publishedAt: currentPostVersion?.publishedAt
+					newPostVersionRest.date instanceof Date
+						? newPostVersionRest.date
+						: new Date(newPostVersionRest.date),
+				createdAt: new Date(),
+				/* publishedAt: previousLatestPostVersion?.publishedAt
 					? new Date()
-					: null,
-				isFeatured: currentPostVersion?.isFeatured,
+					: null, */
 			})
 			.returning();
 
-		const newPostVersionId = newPostResult[0].postVersion;
-
-		console.log("tags", tags);
+		const newPostVersionVersion = newPostResult[0].postVersion;
 
 		if (tags.length > 0) {
 			await tx.insert(postsVersionsToTags).values(
 				tags.map((tag) => ({
-					postId: newPostVersionWithoutTags.postId,
-					postVersion: newPostVersionId,
+					postId: newPostVersionRest.postId,
+					postVersion: newPostVersionVersion,
 					tagName: tag.name,
 				})),
 			);
@@ -151,7 +146,7 @@ export const createPostVersion = async (newPostVersion: TCreatePostVersion) => {
 		await tx
 			.update(posts)
 			.set({
-				latestVersionId: newPostVersionId,
+				latestVersionId: newPostVersionVersion,
 			})
 			.where(eq(posts.id, newPostResult[0].postId));
 

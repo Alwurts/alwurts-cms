@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import type { MDXEditorMethods } from "@mdxeditor/editor";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
@@ -29,6 +29,7 @@ import type { Link } from "@/zod/postLinks";
 
 export default function Editor({ post }: { post: TPostVersion }) {
 	const editorRef = useRef<MDXEditorMethods>(null);
+	const [editorIsDirty, setEditorIsDirty] = useState(false);
 	const formRef = useRef<HTMLFormElement>(null);
 
 	const savePostVersion = useMutation({
@@ -75,6 +76,23 @@ export default function Editor({ post }: { post: TPostVersion }) {
 			});
 			return;
 		}
+
+		if (values.imageLarge && !values.imageLargeDescription?.length) {
+			form.setError("imageLargeDescription", {
+				type: "manual",
+				message: "Please provide a description for the large image",
+			});
+			return;
+		}
+
+		if (values.imageSmall && !values.imageSmallDescription?.length) {
+			form.setError("imageSmallDescription", {
+				type: "manual",
+				message: "Please provide a description for the small image",
+			});
+			return;
+		}
+
 		const formData = new FormData();
 		formData.append("postId", values.postId);
 		formData.append("url", values.url);
@@ -105,7 +123,8 @@ export default function Editor({ post }: { post: TPostVersion }) {
 
 		formData.append("links", JSON.stringify(values.links));
 
-		console.log("formData", formData.entries());
+		console.log("links", JSON.stringify(values.links));
+
 		savePostVersion.mutate(formData);
 	}
 
@@ -243,7 +262,7 @@ export default function Editor({ post }: { post: TPostVersion }) {
 										<FormLabel>Links</FormLabel>
 										<FormControl>
 											<LinksFetch
-												fieldValue={field.value as Link[]}
+												fieldValue={field.value as Link[] | null}
 												setFieldValue={field.onChange}
 											/>
 										</FormControl>
@@ -299,6 +318,10 @@ export default function Editor({ post }: { post: TPostVersion }) {
 													<Input
 														placeholder="Describe the large image"
 														{...field}
+														onChange={(e) => {
+															field.onChange(e);
+															form.clearErrors("imageLargeDescription");
+														}}
 													/>
 												</FormControl>
 												<FormMessage />
@@ -353,6 +376,10 @@ export default function Editor({ post }: { post: TPostVersion }) {
 													<Input
 														placeholder="Describe the small image"
 														{...field}
+														onChange={(e) => {
+															field.onChange(e);
+															form.clearErrors("imageSmallDescription");
+														}}
 													/>
 												</FormControl>
 												<FormMessage />

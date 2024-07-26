@@ -48,6 +48,7 @@ export default function InitializedMDXEditor({
 
 	return (
 		<MDXEditor
+
 			plugins={[
 				headingsPlugin(),
 				codeBlockPlugin({ defaultCodeBlockLanguage: "js" }),
@@ -74,10 +75,8 @@ export default function InitializedMDXEditor({
 				}),
 				imagePlugin({
 					imageUploadHandler: async (image) => {
-						console.log("image", image);
 						const formData = new FormData();
 						formData.append("image", image);
-						console.log("formData", formData);
 						const imageUrl = await uploadImageMutation.mutateAsync(formData);
 						if (!imageUrl) {
 							throw new Error("Failed to upload image");

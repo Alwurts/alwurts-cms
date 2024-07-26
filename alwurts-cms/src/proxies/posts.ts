@@ -39,7 +39,6 @@ export const getPosts = async () => {
 			},
 		},
 	});
-	console.log("result", result);
 	return result;
 };
 
