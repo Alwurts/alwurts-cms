@@ -25,8 +25,16 @@ import {
 	linkDialogPlugin,
 	type MDXEditorMethods,
 	type MDXEditorProps,
+	type SandpackConfig,
+	sandpackPlugin,
+	codeMirrorPlugin,
+	InsertSandpack,
+	ShowSandpackInfo,
+	ChangeCodeMirrorLanguage,
+	ConditionalContents,
 } from "@mdxeditor/editor";
 import type { ForwardedRef } from "react";
+
 
 export default function InitializedMDXEditor({
 	editorRef,
@@ -36,9 +44,21 @@ export default function InitializedMDXEditor({
 		<MDXEditor
 			plugins={[
 				headingsPlugin(),
-				/* codeBlockPlugin({ defaultCodeBlockLanguage: "js" }),
+				codeBlockPlugin({ defaultCodeBlockLanguage: "js" }),
+				codeMirrorPlugin({
+					codeBlockLanguages: {
+						js: "JavaScript",
+						css: "CSS",
+						ts: "TypeScript",
+						py: "Python",
+						html: "HTML",
+						md: "Markdown",
+						json: "JSON",
+						yaml: "YAML",
+					},
+				}),
 				linkPlugin(),
-				linkDialogPlugin(), */
+				linkDialogPlugin(),
 				quotePlugin(),
 				listsPlugin(),
 				thematicBreakPlugin(),
@@ -53,31 +73,43 @@ export default function InitializedMDXEditor({
 				}), */
 				toolbarPlugin({
 					toolbarContents: () => (
-						<>
-							<UndoRedo />
-							<Separator />
-							<BoldItalicUnderlineToggles />
-							<Separator />
-							{/* <CodeToggle />
-							<InsertThematicBreak /> */}
-							<BlockTypeSelect />
-							<Separator />
-							<ListsToggle />
-							{/* <CreateLink />
-							<Separator />
-							<DiffSourceToggleWrapper>
+						<ConditionalContents
+							options={[
+								{
+									when: (editor: any) => editor?.editorType === "codeblock",
+									contents: () => <ChangeCodeMirrorLanguage />,
+								},
+								{
+									fallback: () => (
+										<>
+											<UndoRedo />
+											<Separator />
+											<BoldItalicUnderlineToggles />
+											<Separator />
+											<CodeToggle />
+											<InsertThematicBreak />
+											<BlockTypeSelect />
+											<Separator />
+											<ListsToggle />
+											<CreateLink />
+											<Separator />
+											{/* <DiffSourceToggleWrapper>
 								<UndoRedo />
-							</DiffSourceToggleWrapper>
-							<InsertCodeBlock />
-							<InsertImage /> */}
-						</>
+							</DiffSourceToggleWrapper> */}
+											{/* <InsertImage /> */}
+											<InsertCodeBlock />
+										</>
+									),
+								},
+							]}
+						/>
 					),
 				}),
 			]}
 			{...props}
 			ref={editorRef}
 			className={cn("border-2 rounded-xl", props.className)}
-			contentEditableClassName="prose"
+			contentEditableClassName="prose max-w-none lg:prose-lg dark:prose-invert prose-headings:mb-5"
 		/>
 	);
 }
