@@ -8,6 +8,8 @@ import { linksSchema } from "@/zod/postLinks";
 import { GlobeIcon, LinkIcon, TagIcon } from "lucide-react";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import Link from "next/link";
+import rehypeHighlight from "rehype-highlight";
+import "@/styles/code-highlight.css";
 
 function LinkPanel({ links }: { links: unknown }) {
 	const linksParsed = linksSchema.parse(
@@ -83,7 +85,7 @@ function getGithubRepoName(url: string): string {
 }
 
 function removeHttps(url: string): string {
-	return url.replace(/^https?:\/\//, '');
+	return url.replace(/^https?:\/\//, "");
 }
 
 export default async function Page({ params }: { params: { url: string } }) {
@@ -110,10 +112,15 @@ export default async function Page({ params }: { params: { url: string } }) {
 				<LinkPanel links={post.links} />
 			</div>
 			<Separator />
-			<div /* style={{ lineHeight: "1.5rem" }} */
-				className="prose max-w-none lg:prose-lg dark:prose-invert prose-headings:mb-5"
-			>
-				<MDXRemote source={post.content} />
+			<div className="prose max-w-none lg:prose-lg dark:prose-invert prose-headings:mb-5 dark:prose-pre:bg-zinc-800">
+				<MDXRemote
+					source={post.content}
+					options={{
+						mdxOptions: {
+							rehypePlugins: [rehypeHighlight],
+						},
+					}}
+				/>
 			</div>
 		</div>
 	);

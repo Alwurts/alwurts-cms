@@ -4,6 +4,8 @@ import Image from "next/image";
 import { HoverImage } from "./components/HoverImage";
 import { TypewriterText } from "./components/TypewriterText";
 import { getPublishedFeaturedPosts } from "@/server-actions/post";
+import { GithubIcon } from "@/components/icons/GithubIcon";
+import { LinkedinIcon } from "@/components/icons/LinkedInIcon";
 
 export const revalidate = 60;
 
@@ -47,7 +49,7 @@ export default async function Home() {
 				<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 w-full mt-8">
 					{featuredPosts.slice(0, 4).map((post) => (
 						<Link
-							href={`/posts/${post.url}`}
+							href={`/projects/${post.url}`}
 							key={post.postId}
 							className="border-[3px] border-input-alwurts rounded-[40px] bg-background-alwurts text-card-foreground hover:bg-accent-alwurts transition-transform hover:scale-[97%]"
 						>
@@ -71,7 +73,6 @@ export default async function Home() {
 										: post.description}
 								</p>
 							</div>
-				
 						</Link>
 					))}
 				</div>
@@ -99,12 +100,33 @@ export default async function Home() {
 							height={500}
 							className="h-72 w-72 rounded-full border-[4px] border-input-alwurts hover:bg-accent-alwurts"
 						/>
-						<p className="text-start text-xl mt-4">
-							Software developer with a passion for web development, capable of
-							making scalable dynamic web applications. Most recently, I&apos;ve
-							been developing full stack web apps using tools like Next JS and
-							Express while learning how to scale them for different workloads.
-						</p>
+						<div>
+							<p className="text-start text-xl mt-4">
+								Software developer with a passion for web development, capable
+								of making scalable dynamic web applications. Most recently,
+								I&apos;ve been developing full stack web apps using tools like
+								Next JS and Express while learning how to scale them for
+								different workloads.
+							</p>
+							<p className="text-start text-xl mt-4">
+								Checkout my LinkedIn for more information about my professional
+								experience and my Github for some of my personal projects.
+							</p>
+							<div className="flex space-x-4 mt-4">
+								<Link
+									className="hover:opacity-90 hover:scale-105 transition-all"
+									href="https://www.linkedin.com/in/alejandrowurts/"
+								>
+									<LinkedinIcon className="w-14 h-14" />
+								</Link>
+								<Link
+									className="hover:opacity-90 hover:scale-105 transition-all"
+									href="https://github.com/alwurts"
+								>
+									<GithubIcon className="w-14 h-14" />
+								</Link>
+							</div>
+						</div>
 					</div>
 				</div>
 			</section>

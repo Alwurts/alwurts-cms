@@ -13,12 +13,16 @@ import {
 	uuid,
 	varchar,
 	jsonb,
+	pgEnum,
 } from "drizzle-orm/pg-core";
 import { postsToTags, postsVersionsToTags } from "./postTags";
 import { files } from "./file";
 
+export const postTypeEnum = pgEnum("post_type", ["project", "blog"]);
+
 export const posts = pgTable("posts", {
 	id: uuid("id").primaryKey().defaultRandom(),
+	type: postTypeEnum("type").default("project"),
 	url: varchar("url", { length: 255 }).notNull(),
 	latestVersionId: integer("latest_version_id"),
 	publishedVersionId: integer("published_version_id"),

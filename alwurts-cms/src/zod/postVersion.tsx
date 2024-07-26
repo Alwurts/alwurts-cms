@@ -11,9 +11,9 @@ export const PostVersionSchema = z.object({
 			}),
 		)
 		.or(z.string())
-		.optional(),
+		.nullable(),
 	title: z.string().min(2).max(50),
-	description: z.string().min(2).max(50),
+	description: z.string().min(2).max(200),
 	content: z.string(),
 	author: z.string().min(2).max(50),
 	date: z.date().or(z.string()),
