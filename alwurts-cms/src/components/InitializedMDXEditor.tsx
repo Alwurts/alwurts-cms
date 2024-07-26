@@ -32,9 +32,9 @@ import {
 	ShowSandpackInfo,
 	ChangeCodeMirrorLanguage,
 	ConditionalContents,
+	diffSourcePlugin,
 } from "@mdxeditor/editor";
 import type { ForwardedRef } from "react";
-
 
 export default function InitializedMDXEditor({
 	editorRef,
@@ -62,6 +62,10 @@ export default function InitializedMDXEditor({
 				quotePlugin(),
 				listsPlugin(),
 				thematicBreakPlugin(),
+				diffSourcePlugin({
+					diffMarkdown: "An older version",
+					viewMode: "rich-text",
+				}),
 				/* imagePlugin({
 					imageUploadHandler: () => {
 						return Promise.resolve("https://picsum.photos/200/300");
@@ -76,28 +80,29 @@ export default function InitializedMDXEditor({
 						<ConditionalContents
 							options={[
 								{
-									when: (editor: any) => editor?.editorType === "codeblock",
+									when: (editor) => editor?.editorType === "codeblock",
 									contents: () => <ChangeCodeMirrorLanguage />,
 								},
 								{
 									fallback: () => (
 										<>
-											<UndoRedo />
-											<Separator />
-											<BoldItalicUnderlineToggles />
-											<Separator />
-											<CodeToggle />
-											<InsertThematicBreak />
-											<BlockTypeSelect />
-											<Separator />
-											<ListsToggle />
-											<CreateLink />
-											<Separator />
-											{/* <DiffSourceToggleWrapper>
-								<UndoRedo />
-							</DiffSourceToggleWrapper> */}
-											{/* <InsertImage /> */}
-											<InsertCodeBlock />
+											<DiffSourceToggleWrapper options={
+												['rich-text', 'source']
+											}>
+												<UndoRedo />
+												<Separator />
+												<BoldItalicUnderlineToggles />
+												<Separator />
+												<CodeToggle />
+												<InsertThematicBreak />
+												<BlockTypeSelect />
+												<Separator />
+												<ListsToggle />
+												<CreateLink />
+												<InsertCodeBlock />
+												<Separator />
+												{/* <InsertImage /> */}
+											</DiffSourceToggleWrapper>
 										</>
 									),
 								},
