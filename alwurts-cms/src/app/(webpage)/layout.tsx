@@ -2,13 +2,16 @@ import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import Link from "next/link";
 import { buttonVariants } from "./components/ui/button";
-import Logo from "@/components/icons/Logo";
 import { cn } from "@/lib/utils";
 import { MailIcon } from "@/components/icons/MailIcon";
 import { GithubIcon } from "@/components/icons/GithubIcon";
 import { LinkedinIcon } from "@/components/icons/LinkedInIcon";
 import { XIcon } from "@/components/icons/XIcon";
 import DarkModeToggle from "./components/DarkModeToggle";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import MobileNav from "./components/MobileNav";
+import DesktopNav from "./components/DesktopNav";
 
 const roboto = Roboto({
 	weight: ["100", "300", "400", "500", "700", "900"],
@@ -26,7 +29,7 @@ const links = [
 	{ label: "Contact", href: "/#about" },
 ];
 
-export default async function WebpageLayout({
+export default function WebpageLayout({
 	children,
 }: Readonly<{
 	children: React.ReactNode;
@@ -38,31 +41,8 @@ export default async function WebpageLayout({
 				roboto.className,
 			)}
 		>
-			<nav className="fixed inset-x-0 top-0 z-50 bg-background-alwurts/80 backdrop-blur-sm h-fit">
-				<div className="mx-auto px-6 md:px-12 flex justify-between max-w-6xl h-20 py-3">
-					<Link href="/" className="flex hover:opacity-80 transition-opacity">
-						<Logo className="w-auto h-auto" />
-					</Link>
-					<div className="flex items-center space-x-8">
-						<div className="flex items-center space-x-4">
-							{links.map((link) => (
-								<Link
-									key={link.href}
-									className={buttonVariants({
-										variant: "link",
-										//size: "xl",
-										className: "text-xl",
-									})}
-									href={link.href}
-								>
-									{link.label}
-								</Link>
-							))}
-						</div>
-						<DarkModeToggle />
-					</div>
-				</div>
-			</nav>
+			<MobileNav links={links} />
+			<DesktopNav links={links} />
 			<main className={cn("pt-20")}>{children}</main>
 			<footer className="bg-background-alwurts flex flex-col items-center space-y-6 py-14 mt-auto">
 				<div className="flex items-center justify-center space-x-3">
