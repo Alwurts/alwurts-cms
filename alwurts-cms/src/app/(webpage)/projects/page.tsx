@@ -9,11 +9,11 @@ export default async function Home() {
 	const posts = await getPublishedPosts();
 	return (
 		<div className="max-w-5xl mx-auto text-xl">
-			<section className="flex flex-col items-center w-full space-y-12">
+			<section className="flex flex-col items-center w-full space-y-12 mt-10 px-6">
 				<div className="space-y-6 text-center">
 					<h2 className="text-6xl font-bold">Projects</h2>
 				</div>
-				<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 w-full mt-8">
+				<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 xl:gap-6 w-full mt-8 md:px-20 lg:px-44 xl:px-0">
 					{posts.slice(0, 4).map((post) => (
 						<Link
 							href={`/projects/${post.url}`}

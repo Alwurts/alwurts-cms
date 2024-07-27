@@ -12,9 +12,9 @@ export const revalidate = 60;
 export default async function Home() {
 	const featuredPosts = await getPublishedFeaturedPosts();
 	return (
-		<div className="max-w-5xl mx-auto text-xl">
-			<section className="h-[calc(100vh-5rem)] pb-24 flex flex-col items-center justify-center w-full space-y-10">
-				<div className="space-y-6">
+		<div className="max-w-6xl mx-auto text-xl">
+			<section className="h-[calc(100vh-5rem)] pb-24 flex flex-col items-center justify-center w-full space-y-10 px-6">
+				<div className="space-y-6 text-center">
 					<h1 className="text-7xl font-bold text-accent-alwurts">
 						Alejandro Wurts
 					</h1>
@@ -39,14 +39,14 @@ export default async function Home() {
 					About me
 				</Link>
 			</section>
-			<section className="flex flex-col items-center w-full space-y-12 mb-36">
+			<section className="flex flex-col items-center w-full space-y-12 mb-36 px-6">
 				<div className="space-y-6 text-center">
 					<h2 className="text-6xl font-bold">Featured projects</h2>
 					<p className="text-2xl">
 						A collection of projects I&apos;m proud about.
 					</p>
 				</div>
-				<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 w-full mt-8">
+				<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 xl:gap-6 w-full mt-8 md:px-20 lg:px-44 xl:px-0">
 					{featuredPosts.slice(0, 4).map((post) => (
 						<Link
 							href={`/projects/${post.url}`}
@@ -77,7 +77,7 @@ export default async function Home() {
 					))}
 				</div>
 				<div className="flex flex-col items-center justify-center space-y-7">
-					<p className="text-2xl">
+					<p className="text-2xl text-center">
 						To see some of my other projects, click below
 					</p>
 					<Link
@@ -88,17 +88,17 @@ export default async function Home() {
 					</Link>
 				</div>
 			</section>
-			<section id="about" className="flex flex-col items-center w-full space-y-4 mb-24">
+			<section id="about" className="flex flex-col items-center w-full space-y-4 mb-12 md:mb-24 px-6">
 				<div className="space-y-14 text-center">
 					<h2 className="text-6xl font-bold">Alejandro 101</h2>
-					<div className="flex justify-center space-x-12">
+					<div className="flex flex-col md:flex-row justify-center space-y-6 md:space-y-0 md:space-x-12">
 						<HoverImage
 							defaultSrc="/alwurtstransparent.png"
 							hoverSrc="/alwurtscolortransparent.png"
 							alt="Alejandro 101"
 							width={500}
 							height={500}
-							className="h-72 w-72 rounded-full border-[4px] border-input-alwurts hover:bg-accent-alwurts"
+							className="h-72 w-72 rounded-full border-[4px] border-input-alwurts hover:bg-accent-alwurts mx-auto"
 						/>
 						<div>
 							<p className="text-start text-xl mt-4">
