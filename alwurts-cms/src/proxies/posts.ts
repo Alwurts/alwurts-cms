@@ -1,7 +1,7 @@
 import { db } from "@/database";
 import { posts } from "@/database/schema";
 import type { TCreatePost } from "@/types/database/post";
-import { and, eq, isNotNull } from "drizzle-orm";
+import { and, asc, desc, eq, isNotNull } from "drizzle-orm";
 import "server-only";
 
 export const createPost = async (post: TCreatePost) => {
@@ -38,6 +38,7 @@ export const getPosts = async () => {
 				},
 			},
 		},
+		orderBy: asc(posts.url),
 	});
 	return result;
 };

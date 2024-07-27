@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 export const PostVersionSchema = z.object({
+	publish: z.string().optional(),
 	postId: z.string(),
 	url: z.string().min(2).max(50),
 	links: z
@@ -11,7 +12,7 @@ export const PostVersionSchema = z.object({
 			}),
 		)
 		.or(z.string())
-		.nullable(),
+		.nullable().optional(),
 	title: z.string().min(2).max(50),
 	description: z.string().min(2).max(200),
 	content: z.string(),

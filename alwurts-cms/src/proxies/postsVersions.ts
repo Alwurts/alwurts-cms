@@ -69,6 +69,17 @@ export const publishLatestVersion = async (postId: string) => {
 	return result[0];
 };
 
+export const unpublish = async (postId: string) => {
+	const result = await db
+		.update(posts)
+		.set({
+			publishedVersionId: null,
+		})
+		.where(eq(posts.id, postId))
+		.returning();
+	return result[0];
+};
+
 export const markPublishedVersionAsFeatured = async (postId: string) => {
 	const publishedVersion = await getPublishedVersion(postId);
 	const result = await db
@@ -82,17 +93,12 @@ export const markPublishedVersionAsFeatured = async (postId: string) => {
 };
 
 export const createPostVersion = async (newPostVersion: TCreatePostVersion) => {
-	const { tags, ...newPostVersionRest } = newPostVersion;
+	const { publish, tags, ...newPostVersionRest } = newPostVersion;
 
-	return db.transaction(async (tx) => {
-		const previousPostVersions = await tx
-			.select()
-			.from(postVersions)
-			.where(eq(postVersions.postId, newPostVersionRest.postId))
-			.orderBy(desc(postVersions.postVersion))
-			.limit(1);
-
-		const previousLatestPostVersion = previousPostVersions[0];
+	const newPostResult = await db.transaction(async (tx) => {
+		const previousLatestPostVersion = await getLatestPostVersion(
+			newPostVersionRest.postId,
+		);
 
 		const imageLargeId = await filesProxy.handleImageUpdate(
 			newPostVersionRest.imageLarge,
@@ -133,6 +139,7 @@ export const createPostVersion = async (newPostVersion: TCreatePostVersion) => {
 
 		const newPostVersionVersion = newPostResult[0].postVersion;
 
+		// Add tags to post version relation
 		if (tags.length > 0) {
 			await tx.insert(postsVersionsToTags).values(
 				tags.map((tag) => ({
@@ -152,4 +159,10 @@ export const createPostVersion = async (newPostVersion: TCreatePostVersion) => {
 
 		return newPostResult[0];
 	});
+
+	if (newPostVersion.publish) {
+		await publishLatestVersion(newPostVersionRest.postId);
+	}
+
+	return newPostResult;
 };

@@ -7,8 +7,9 @@ import { revalidatePath } from "next/cache";
 
 export const getLatestPostVersion = withAuthCheck(
 	async (session, postId: string) => {
-		const latestPostVersion = await postsVersionsProxy.getLatestPostVersion(postId);
-    console.log("latestPostVersion", latestPostVersion);
+		const latestPostVersion =
+			await postsVersionsProxy.getLatestPostVersion(postId);
+		console.log("latestPostVersion", latestPostVersion);
 		return latestPostVersion;
 	},
 );
@@ -20,6 +21,12 @@ export const publishLatestVersion = withAuthCheck(
 		return result;
 	},
 );
+
+export const unpublish = withAuthCheck(async (session, postId: string) => {
+	const result = await postsVersionsProxy.unpublish(postId);
+	revalidatePath("/editor");
+	return result;
+});
 
 export const markPublishedVersionAsFeatured = withAuthCheck(
 	async (session, postId: string) => {

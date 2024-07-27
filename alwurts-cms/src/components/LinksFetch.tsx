@@ -32,8 +32,6 @@ export function LinksFetch({
 		},
 	});
 
-	console.log("fieldValue", fieldValue);
-
 	function onSubmit(values: Link) {
 		if (!fieldValue) {
 			setFieldValue([values]);

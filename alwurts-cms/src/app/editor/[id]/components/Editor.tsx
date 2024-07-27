@@ -26,6 +26,7 @@ import Image from "next/image";
 import { PostVersionSchema } from "@/zod/postVersion";
 import { LinksFetch } from "@/components/LinksFetch";
 import type { Link } from "@/zod/postLinks";
+import LoadingButton from "@/components/ui/loading-button";
 
 export default function Editor({ post }: { post: TPostVersion }) {
 	const editorRef = useRef<MDXEditorMethods>(null);
@@ -66,8 +67,11 @@ export default function Editor({ post }: { post: TPostVersion }) {
 		},
 	});
 
-	// 2. Define a submit handler.
-	function onSubmit(values: z.infer<typeof PostVersionSchema>) {
+	// Modify the onSubmit function to accept a publish parameter
+	function onSubmit(
+		values: z.infer<typeof PostVersionSchema>,
+		publish: boolean,
+	) {
 		const content = editorRef.current?.getMarkdown();
 		if (!content) {
 			toast({
@@ -123,7 +127,12 @@ export default function Editor({ post }: { post: TPostVersion }) {
 
 		formData.append("links", JSON.stringify(values.links));
 
-		console.log("links", JSON.stringify(values.links));
+		// Add the publish status to the form data
+		console.log("publish", publish);
+		if (publish) {
+			formData.append("publish", publish.toString());
+		}
+		//console.log("links", JSON.stringify(values.links));
 
 		savePostVersion.mutate(formData);
 	}
@@ -143,16 +152,26 @@ export default function Editor({ post }: { post: TPostVersion }) {
 			classname="max-w-4xl mx-auto"
 			cardHeaderContent={
 				<Form {...form}>
-					<form
-						ref={formRef}
-						onSubmit={form.handleSubmit(onSubmit)}
-						className="flex flex-col gap-10"
-					>
+					<form ref={formRef} className="flex flex-col gap-10">
 						<div className="grid grid-cols-2 gap-y-2 gap-x-4">
-							<div className="col-span-2">
-								<Button size="sm" type="submit">
+							<div className="col-span-2 flex gap-2">
+								<LoadingButton
+									isLoading={savePostVersion.isPending}
+									disabled={savePostVersion.isPending}
+									size="sm"
+									onClick={form.handleSubmit((data) => onSubmit(data, false))}
+								>
 									Save
-								</Button>
+								</LoadingButton>
+								<LoadingButton
+									isLoading={savePostVersion.isPending}
+									disabled={savePostVersion.isPending}
+									size="sm"
+									variant="outline"
+									onClick={form.handleSubmit((data) => onSubmit(data, true))}
+								>
+									Save and Publish
+								</LoadingButton>
 							</div>
 							<FormField
 								control={form.control}

@@ -28,6 +28,7 @@ import Link from "next/link";
 import {
 	markPublishedVersionAsFeatured,
 	publishLatestVersion,
+	unpublish,
 } from "@/server-actions/postVersions";
 import type { TPostVersion } from "@/types/database/postVersion";
 import { useMutation } from "@tanstack/react-query";
@@ -39,6 +40,7 @@ import {
 } from "@/components/ui/collapsible";
 import { StarFilledIcon } from "@/components/icons/StartFilledIcon";
 import { StarOutlineIcon } from "@/components/icons/StartOutlineIcon";
+import LoadingButton from "@/components/ui/loading-button";
 
 function PostCardContent({
 	post,
@@ -127,9 +129,12 @@ function PostCardContent({
 export default function PostCard({
 	post: { id: postId, publishedVersion, latestVersion },
 }: { post: TPost }) {
-
 	const handlePublishLatestVersion = useMutation({
 		mutationFn: publishLatestVersion,
+	});
+
+	const handleUnpublish = useMutation({
+		mutationFn: unpublish,
 	});
 
 	const handleMarkPublishedVersionAsFeatured = useMutation({
@@ -183,38 +188,45 @@ export default function PostCard({
 										<ChevronDownIcon className="w-4 h-4" />
 									</CollapsibleTrigger>
 								)}
-							<Button
+							<LoadingButton
 								size="sm"
+								isLoading={handlePublishLatestVersion.isPending}
 								disabled={
 									handlePublishLatestVersion.isPending ||
 									publishedVersion?.postVersion === latestVersion?.postVersion
 								}
 								onClick={() => handlePublishLatestVersion.mutate(postId)}
 							>
-								{handlePublishLatestVersion.isPending ? (
-									<Loader2Icon className="w-4 h-4 mr-2 animate-spin" />
-								) : publishedVersion?.postVersion ===
-									latestVersion?.postVersion ? (
-									"Latest version is published"
-								) : (
-									"Publish latest version"
-								)}
-							</Button>
-							<Button
-								size="sm"
-								variant="outline"
-								onClick={() =>
-									handleMarkPublishedVersionAsFeatured.mutate(postId)
-								}
-							>
-								{handleMarkPublishedVersionAsFeatured.isPending ? (
-									<Loader2Icon className="w-4 h-4 mr-2 animate-spin" />
-								) : publishedVersion?.isFeatured ? (
-									<StarFilledIcon className="w-4 h-4 text-yellow-500" />
-								) : (
-									<StarOutlineIcon className="w-4 h-4" />
-								)}
-							</Button>
+								{publishedVersion?.postVersion === latestVersion?.postVersion
+									? "Latest version is published"
+									: "Publish latest version"}
+							</LoadingButton>
+							{publishedVersion && (
+								<LoadingButton
+									size="sm"
+									disabled={handleUnpublish.isPending}
+									onClick={() => handleUnpublish.mutate(postId)}
+									isLoading={handleUnpublish.isPending}
+								>
+									Unpublish
+								</LoadingButton>
+							)}
+							{publishedVersion && (
+								<LoadingButton
+									size="sm"
+									variant="outline"
+									isLoading={handleMarkPublishedVersionAsFeatured.isPending}
+									onClick={() =>
+										handleMarkPublishedVersionAsFeatured.mutate(postId)
+									}
+								>
+									{publishedVersion?.isFeatured ? (
+										<StarFilledIcon className="w-4 h-4 text-yellow-500" />
+									) : (
+										<StarOutlineIcon className="w-4 h-4" />
+									)}
+								</LoadingButton>
+							)}
 							<Link
 								className={buttonVariants({ variant: "outline" })}
 								href={`/editor/${postId}`}

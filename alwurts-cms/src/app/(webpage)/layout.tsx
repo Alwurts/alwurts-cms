@@ -22,8 +22,8 @@ export const metadata: Metadata = {
 
 const links = [
 	{ label: "Projects", href: "/projects" },
-	{ label: "About", href: "/about" },
-	{ label: "Contact", href: "/contact" },
+	{ label: "About", href: "/#about" },
+	{ label: "Contact", href: "/#about" },
 ];
 
 export default async function WebpageLayout({

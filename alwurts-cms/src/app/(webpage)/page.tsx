@@ -88,7 +88,7 @@ export default async function Home() {
 					</Link>
 				</div>
 			</section>
-			<section className="flex flex-col items-center w-full space-y-4 mb-24">
+			<section id="about" className="flex flex-col items-center w-full space-y-4 mb-24">
 				<div className="space-y-14 text-center">
 					<h2 className="text-6xl font-bold">Alejandro 101</h2>
 					<div className="flex justify-center space-x-12">
@@ -102,11 +102,12 @@ export default async function Home() {
 						/>
 						<div>
 							<p className="text-start text-xl mt-4">
-								Software developer with a passion for web development, capable
-								of making scalable dynamic web applications. Most recently,
-								I&apos;ve been developing full stack web apps using tools like
-								Next JS and Express while learning how to scale them for
-								different workloads.
+								Full Stack Developer with experience in crafting efficient and
+								scalable web applications. My expertise encompasses frontend
+								frameworks and backend architectures, obtained through roles at
+								Oracle and other tech ventures. Proficient in TypeScript,
+								JavaScript, React, Next JS and Python, I prioritize clean code,
+								optimized performance, and user-centric design.
 							</p>
 							<p className="text-start text-xl mt-4">
 								Checkout my LinkedIn for more information about my professional
