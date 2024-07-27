@@ -1,9 +1,8 @@
 "use client";
 
 import type { MDXEditorMethods, MDXEditorProps } from "@mdxeditor/editor";
-import { Loader2Icon } from "lucide-react";
 import dynamic from "next/dynamic";
-import { Suspense, forwardRef } from "react";
+import { forwardRef } from "react";
 import { Skeleton } from "./ui/skeleton";
 
 // This is the only place InitializedMDXEditor is imported directly.

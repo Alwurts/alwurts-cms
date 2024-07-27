@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import Link from "next/link";
 import { buttonVariants } from "./components/ui/button";
 import Image from "next/image";
@@ -6,8 +8,6 @@ import { TypewriterText } from "./components/TypewriterText";
 import { getPublishedFeaturedPosts } from "@/server-actions/post";
 import { GithubIcon } from "@/components/icons/GithubIcon";
 import { LinkedinIcon } from "@/components/icons/LinkedInIcon";
-
-export const revalidate = 60;
 
 export default async function Home() {
 	const featuredPosts = await getPublishedFeaturedPosts();
@@ -88,7 +88,10 @@ export default async function Home() {
 					</Link>
 				</div>
 			</section>
-			<section id="about" className="flex flex-col items-center w-full space-y-4 mb-12 md:mb-24 px-6">
+			<section
+				id="about"
+				className="flex flex-col items-center w-full space-y-4 mb-12 md:mb-24 px-6"
+			>
 				<div className="space-y-14 text-center">
 					<h2 className="text-6xl font-bold">Alejandro 101</h2>
 					<div className="flex flex-col md:flex-row justify-center space-y-6 md:space-y-0 md:space-x-12">

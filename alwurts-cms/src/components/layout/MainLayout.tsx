@@ -2,8 +2,6 @@ import DynamicBreadcrumb from "@/components/breadcrumb/DynamicBreadcrumb";
 import { SidebarNavigation } from "@/components/layout/navigation/SidebarNavigation";
 import { MobileNavigation } from "@/components/layout/navigation/MobileNavigation";
 import { UserActions } from "@/components/layout/navigation/UserActions";
-import { Suspense } from "react";
-import MainLoader from "@/components/skeleton/MainLoader";
 
 export function MainLayout({
 	children,

@@ -8,10 +8,11 @@ import { GithubIcon } from "@/components/icons/GithubIcon";
 import { LinkedinIcon } from "@/components/icons/LinkedInIcon";
 import { XIcon } from "@/components/icons/XIcon";
 import DarkModeToggle from "./components/DarkModeToggle";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import MobileNav from "./components/MobileNav";
 import DesktopNav from "./components/DesktopNav";
+import MainLoader from "@/components/skeleton/MainLoader";
 
 const roboto = Roboto({
 	weight: ["100", "300", "400", "500", "700", "900"],
@@ -43,7 +44,9 @@ export default function WebpageLayout({
 		>
 			<MobileNav links={links} />
 			<DesktopNav links={links} />
-			<main className={cn("pt-20")}>{children}</main>
+			<main className={cn("pt-20")}>
+				<Suspense fallback={<MainLoader />}>{children}</Suspense>
+			</main>
 			<footer className="bg-background-alwurts flex flex-col items-center space-y-6 py-14 mt-auto">
 				<div className="flex items-center justify-center space-x-3">
 					<Link
