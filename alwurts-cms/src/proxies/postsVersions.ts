@@ -93,6 +93,9 @@ export const markPublishedVersionAsFeatured = async (postId: string) => {
 		})
 		.where(eq(postVersions.postId, postId))
 		.returning();
+	revalidateTag("getPublishedPosts");
+	revalidateTag("getPublishedFeaturedPosts");
+	revalidateTag("getPublishedPostByUrl");
 	return result[0];
 };
 
