@@ -43,7 +43,7 @@ export const getPublishedPosts = unstable_cache(
 	postsProxy.getPublishedPosts,
 	["getPublishedPosts"],
 	{
-		revalidate: 10,
+		tags: ["getPublishedPosts"],
 	},
 );
 
@@ -51,7 +51,7 @@ export const getPublishedFeaturedPosts = unstable_cache(
 	postsProxy.getPublishedFeaturedPosts,
 	["getPublishedFeaturedPosts"],
 	{
-		revalidate: 10,
+		tags: ["getPublishedFeaturedPosts"],
 	},
 );
 
@@ -59,6 +59,6 @@ export const getPublishedPostByUrl = unstable_cache(
 	postsProxy.getPublishedPostByUrl,
 	["getPublishedPostByUrl"],
 	{
-		revalidate: 8,
+		tags: ["getPublishedPostByUrl"],
 	},
 );

@@ -5,6 +5,7 @@ import { postVersions, posts, postsVersionsToTags } from "@/database/schema";
 import type { TCreatePostVersion } from "@/types/database/postVersion";
 import { eq, desc, and } from "drizzle-orm";
 import * as filesProxy from "@/proxies/files";
+import { revalidateTag } from "next/cache";
 
 export const getLatestPostVersion = async (postId: string) => {
 	const latestPostVersion = await db.query.posts.findFirst({
@@ -66,6 +67,9 @@ export const publishLatestVersion = async (postId: string) => {
 				eq(postVersions.postVersion, latestVersion.postVersion),
 			),
 		);
+	revalidateTag("getPublishedPosts");
+	revalidateTag("getPublishedFeaturedPosts");
+	revalidateTag("getPublishedPostByUrl");
 	return result[0];
 };
 
