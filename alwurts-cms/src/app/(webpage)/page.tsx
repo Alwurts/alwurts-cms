@@ -30,7 +30,7 @@ export default async function Home() {
 					</h2>
 				</div>
 				<Link
-					href="/contact"
+					href="/#about"
 					className={buttonVariants({
 						size: "xl",
 						variant: "outline",
