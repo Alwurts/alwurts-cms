@@ -22,6 +22,9 @@ COPY postcss.config.mjs .
 ARG NODE_ENV
 ENV NODE_ENV=${NODE_ENV}
 
+ARG HOST_URL
+ENV HOST_URL=${HOST_URL}
+
 ARG POSTGRES_HOST
 ENV POSTGRES_HOST=${POSTGRES_HOST}
 ARG POSTGRES_PORT
@@ -94,6 +97,9 @@ COPY --from=builder --chown=nextjs:nodejs /app/scripts/run.sh ./run.sh
 # https://github.com/vercel/next.js/discussions/14030
 ARG NODE_ENV
 ENV NODE_ENV=${NODE_ENV}
+
+ARG HOST_URL
+ENV HOST_URL=${HOST_URL}
 
 ARG POSTGRES_HOST
 ENV POSTGRES_HOST=${POSTGRES_HOST}

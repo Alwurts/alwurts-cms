@@ -8,6 +8,7 @@ services:
       dockerfile: prod.Dockerfile
       args:
         NODE_ENV: production
+        HOST_URL: ${HOST_URL}
         POSTGRES_HOST: alwurts-cms-db
         POSTGRES_PORT: 5432
         POSTGRES_DB: ${POSTGRES_DB}
