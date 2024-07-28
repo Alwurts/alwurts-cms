@@ -59,6 +59,9 @@ export const getPublishedPosts = async () => {
 	const publishedPosts = result.map((post) => post.publishedVersion);
 
 	const filteredPublishedPosts = publishedPosts.filter((post) => !!post);
+	filteredPublishedPosts.sort((a, b) => {
+		return new Date(b.date).getTime() - new Date(a.date).getTime();
+	});
 	return filteredPublishedPosts;
 };
 
