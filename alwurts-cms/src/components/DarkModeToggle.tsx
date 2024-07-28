@@ -29,6 +29,7 @@ const DarkModeToggle = () => {
 	return (
 		<Button
 			onClick={toggleTheme}
+			aria-label="Toggle dark mode"
 			variant="ghost"
 			className="w-10 h-10 relative overflow-hidden"
 		>
