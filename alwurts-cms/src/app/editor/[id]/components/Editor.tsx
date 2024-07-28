@@ -127,12 +127,9 @@ export default function Editor({ post }: { post: TPostVersion }) {
 
 		formData.append("links", JSON.stringify(values.links));
 
-		// Add the publish status to the form data
-		console.log("publish", publish);
 		if (publish) {
 			formData.append("publish", publish.toString());
 		}
-		//console.log("links", JSON.stringify(values.links));
 
 		savePostVersion.mutate(formData);
 	}

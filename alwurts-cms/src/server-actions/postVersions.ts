@@ -9,7 +9,6 @@ export const getLatestPostVersion = withAuthCheck(
 	async (session, postId: string) => {
 		const latestPostVersion =
 			await postsVersionsProxy.getLatestPostVersion(postId);
-		console.log("latestPostVersion", latestPostVersion);
 		return latestPostVersion;
 	},
 );
