@@ -24,16 +24,14 @@ import {
 	ListsToggle,
 	Separator,
 	linkDialogPlugin,
-	type MDXEditorMethods,
-	type MDXEditorProps,
-	type SandpackConfig,
-	sandpackPlugin,
 	codeMirrorPlugin,
-	InsertSandpack,
-	ShowSandpackInfo,
 	ChangeCodeMirrorLanguage,
 	ConditionalContents,
 	diffSourcePlugin,
+	tablePlugin,
+	InsertTable,
+	type MDXEditorMethods,
+	type MDXEditorProps,
 } from "@mdxeditor/editor";
 import { useMutation } from "@tanstack/react-query";
 import type { ForwardedRef } from "react";
@@ -48,10 +46,10 @@ export default function InitializedMDXEditor({
 
 	return (
 		<MDXEditor
-
 			plugins={[
 				headingsPlugin(),
 				codeBlockPlugin({ defaultCodeBlockLanguage: "js" }),
+				tablePlugin(),
 				codeMirrorPlugin({
 					codeBlockLanguages: {
 						js: "JavaScript",
@@ -108,6 +106,7 @@ export default function InitializedMDXEditor({
 												<Separator />
 												<ListsToggle />
 												<CreateLink />
+												<InsertTable />
 												<InsertCodeBlock />
 												<Separator />
 												<InsertImage />
