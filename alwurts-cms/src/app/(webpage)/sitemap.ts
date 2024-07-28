@@ -1,3 +1,6 @@
+export const dynamic = "force-dynamic";
+export const revalidate = 60 * 60 * 24;
+
 import { getPublishedPosts } from "@/server-actions/post";
 import type { MetadataRoute } from "next";
 
