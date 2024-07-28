@@ -47,7 +47,7 @@ export default async function Home() {
 					</p>
 				</div>
 				<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 xl:gap-6 w-full mt-8 md:px-20 lg:px-44 xl:px-0">
-					{featuredPosts.map((post) => (
+					{featuredPosts.slice(0, 4).map((post) => (
 						<Link
 							href={`/projects/${post.url}`}
 							key={post.postId}

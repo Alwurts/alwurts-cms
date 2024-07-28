@@ -8,7 +8,7 @@ export default async function Posts() {
 	const posts = await getPublishedPosts();
 	return (
 		<div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-8 xl:gap-6 w-full mt-8 md:px-20 lg:px-44 xl:px-0">
-			{posts.slice(0, 4).map((post) => (
+			{posts.map((post) => (
 				<Link
 					href={`/projects/${post.url}`}
 					key={post.postId}
