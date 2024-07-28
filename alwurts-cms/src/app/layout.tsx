@@ -4,6 +4,7 @@ import "./globals.css";
 import QueryProvider from "./QueryProvider";
 import { Toaster } from "@/components/ui/toaster";
 import { ThemeProvider } from "next-themes";
+import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,6 +25,11 @@ export default function RootLayout({
 					<ThemeProvider attribute="class">{children}</ThemeProvider>
 				</QueryProvider>
 				<Toaster />
+				<Script
+					defer
+					src="https://umami.alwurts.com/script.js"
+					data-website-id="c3f69501-4467-4f4b-abf5-7b4ee80f34fe"
+				/>
 			</body>
 		</html>
 	);
