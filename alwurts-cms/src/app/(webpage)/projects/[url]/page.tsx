@@ -10,6 +10,7 @@ import { MDXRemote } from "next-mdx-remote/rsc";
 import Link from "next/link";
 import rehypeHighlight from "rehype-highlight";
 import "@/styles/code-highlight.css";
+import type { Metadata, ResolvingMetadata } from "next";
 
 function LinkPanel({ links }: { links: unknown }) {
 	const linksParsed = linksSchema.parse(
@@ -86,6 +87,33 @@ function getGithubRepoName(url: string): string {
 
 function removeHttps(url: string): string {
 	return url.replace(/^https?:\/\//, "");
+}
+
+export async function generateMetadata({
+	params,
+}: { params: { url: string } }): Promise<Metadata> {
+	// read route params
+	const url = params.url;
+
+	// fetch data
+	const post = await getPublishedPostByUrl(url);
+	if (!post) {
+		return {
+			title: "Not found",
+		};
+	}
+
+	return {
+		title: post.title,
+		description: post.description,
+		authors: {
+			name: "Alwurts",
+			url: "https://alwurts.com",
+		},
+		openGraph: {
+			images: [post.imageSmall?.url || ""],
+		},
+	};
 }
 
 export default async function Page({ params }: { params: { url: string } }) {
