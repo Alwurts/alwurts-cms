@@ -7,10 +7,12 @@ WORKDIR /app
 
 # Install dependencies based on the preferred package manager
 COPY package.json package-lock.json ./
+# COPY src/database/drizzle ./src/database/drizzle
 # Omit --production flag for TypeScript devDependencies
 RUN npm ci
 
 COPY src ./src
+COPY scripts ./scripts
 COPY public ./public
 COPY next.config.mjs .
 COPY tsconfig.json .
@@ -74,11 +76,19 @@ RUN adduser --system --uid 1001 nextjs
 USER nextjs
 
 COPY --from=builder /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/node_modules ./node_modules
 
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# Move the drizzle directory to the runtime image
+COPY --from=builder --chown=nextjs:nodejs /app/src/database/drizzle ./src/database/drizzle
+
+# Move the run script and litestream config to the runtime image
+COPY --from=builder --chown=nextjs:nodejs /app/scripts/migrations/migration.mjs ./scripts/migrations/migration.mjs
+COPY --from=builder --chown=nextjs:nodejs /app/scripts/run.sh ./run.sh
 
 # Environment variables must be present at build time
 # https://github.com/vercel/next.js/discussions/14030
@@ -124,4 +134,4 @@ ENV NEXT_TELEMETRY_DISABLED 1
 
 # Note: Don't expose ports here, Compose will handle that for us
 
-CMD ["node", "server.js"]
+CMD ["sh", "run.sh"]
