@@ -41,6 +41,12 @@ import {
 import { StarFilledIcon } from "@/components/icons/StartFilledIcon";
 import { StarOutlineIcon } from "@/components/icons/StartOutlineIcon";
 import LoadingButton from "@/components/ui/loading-button";
+import {
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from "@/components/ui/accordion";
 
 function PostCardContent({
 	post,
@@ -52,77 +58,81 @@ function PostCardContent({
 	className?: string;
 }) {
 	return (
-		<CardContent
-			className={cn(className, "space-y-1 p-4 border-2 rounded-md", {
-				"border-dashed": version === "latest",
-			})}
-		>
-			<h3 className="text-base font-medium capitalize">
-				{`${version}: ${post.postVersion}`}
-			</h3>
-			<div className="flex flex-col gap-4">
-				<div>
-					<div className="flex items-center space-x-2 text-sm">
-						<LinkIcon className="w-4 h-4" />
-						<span>URL: {post.url}</span>
-					</div>
-
-					<div className="flex items-center space-x-2 text-sm">
-						<CalendarIcon className="w-4 h-4" />
-						<span>Date: {post.date.toDateString()}</span>
-					</div>
-					<div className="flex items-center space-x-2 text-sm">
-						<User2Icon className="w-4 h-4" />
-						<span>Author: {post.author}</span>
-					</div>
-
-					<div className="flex items-center space-x-2 text-sm">
-						<TagIcon className="w-4 h-4" />
-						{post.tags.map((tag) => (
-							<Badge key={tag.tagName} variant="outline">
-								{tag.tagName}
-							</Badge>
-						))}
-					</div>
-				</div>
-				<div className="flex gap-4">
-					<div className="flex flex-col items-start gap-2">
+		<div className={cn(className, "flex flex-col h-full")}>
+			<div
+				className={cn("space-y-1 p-4 border-2 rounded-md flex-grow", {
+					"border-dashed": version === "latest",
+				})}
+			>
+				<h3 className="text-base font-medium capitalize">
+					{`${version}: ${post.postVersion}`}
+				</h3>
+				<div className="flex flex-col gap-4">
+					<div>
 						<div className="flex items-center space-x-2 text-sm">
-							<ImageIcon className="w-4 h-4" />
-							<h4>Image small</h4>
+							<LinkIcon className="w-4 h-4" />
+							<span>URL: {post.url}</span>
 						</div>
-						{post.imageSmall ? (
-							<Image
-								src={post.imageSmall.url ?? ""}
-								alt={post.imageSmall.description ?? ""}
-								width={150}
-								height={150}
-								className="object-contain h-[150px] w-auto border-2 border-stone-400 rounded-md"
-							/>
-						) : (
-							<div>No image small</div>
-						)}
-					</div>
-					<div className="flex flex-col items-start gap-2">
+
 						<div className="flex items-center space-x-2 text-sm">
-							<ImageIcon className="w-4 h-4" />
-							<h4>Image large</h4>
+							<CalendarIcon className="w-4 h-4" />
+							<span>Date: {post.date.toDateString()}</span>
 						</div>
-						{post.imageLarge ? (
-							<Image
-								src={post.imageLarge.url ?? ""}
-								alt={post.imageLarge.description ?? ""}
-								width={150}
-								height={150}
-								className="object-contain h-[150px] w-auto border-2 border-stone-400 rounded-md"
-							/>
-						) : (
-							<div>No image small</div>
-						)}
+						<div className="flex items-center space-x-2 text-sm">
+							<User2Icon className="w-4 h-4" />
+							<span>Author: {post.author}</span>
+						</div>
+
+						<div className="flex items-center space-x-2 text-sm">
+							<TagIcon className="w-4 h-4" />
+							{post.tags.map((tag) => (
+								<Badge key={tag.tagName} variant="outline">
+									{tag.tagName}
+								</Badge>
+							))}
+						</div>
 					</div>
+					<Accordion type="single" collapsible className="w-full text-sm" defaultValue="small-image">
+						<AccordionItem value="small-image">
+							<AccordionTrigger className="py-2">Small Image</AccordionTrigger>
+							<AccordionContent>
+								<div className="flex flex-col items-start gap-2">
+									{post.imageSmall ? (
+										<Image
+											src={post.imageSmall.url ?? ""}
+											alt={post.imageSmall.description ?? ""}
+											width={150}
+											height={150}
+											className="object-contain h-[150px] w-auto border-2 border-stone-400 rounded-md"
+										/>
+									) : (
+										<div>No image small</div>
+									)}
+								</div>
+							</AccordionContent>
+						</AccordionItem>
+						<AccordionItem value="large-image">
+							<AccordionTrigger className="py-2">Large Image</AccordionTrigger>
+							<AccordionContent>
+								<div className="flex flex-col items-start gap-2">
+									{post.imageLarge ? (
+										<Image
+											src={post.imageLarge.url ?? ""}
+											alt={post.imageLarge.description ?? ""}
+											width={150}
+											height={150}
+											className="object-contain h-[150px] w-auto border-2 border-stone-400 rounded-md"
+										/>
+									) : (
+										<div>No image large</div>
+									)}
+								</div>
+							</AccordionContent>
+						</AccordionItem>
+					</Accordion>
 				</div>
 			</div>
-		</CardContent>
+		</div>
 	);
 }
 
@@ -142,10 +152,10 @@ export default function PostCard({
 	});
 
 	return (
-		<Card className="w-full">
-			<CardHeader>
-				<CardTitle className="flex justify-start items-center gap-2">
-					<span>
+		<Card className="w-full h-full flex flex-col">
+			<CardHeader className="flex-shrink-0">
+				<CardTitle className="flex flex-col sm:flex-row justify-start items-start sm:items-center gap-2 text-base sm:text-lg">
+					<span className="truncate">
 						{publishedVersion ? publishedVersion.url : latestVersion?.url}
 					</span>
 					<Badge variant={publishedVersion ? "default" : "destructive"}>
@@ -153,28 +163,30 @@ export default function PostCard({
 					</Badge>
 				</CardTitle>
 			</CardHeader>
-			{publishedVersion && latestVersion ? (
-				<div className="flex flex-col gap-2">
+			<CardContent className="flex-grow overflow-auto flex flex-col">
+				{publishedVersion && latestVersion ? (
+					<div className="flex flex-col gap-2 h-full">
+						<PostCardContent
+							post={publishedVersion}
+							version="published"
+							className="flex-grow"
+						/>
+						{publishedVersion.postVersion < latestVersion.postVersion && (
+							<span className="text-destructive px-6 mt-3">{`Published version is ${latestVersion.postVersion - publishedVersion.postVersion} version${latestVersion.postVersion - publishedVersion.postVersion > 1 ? "s" : ""} behind latest version`}</span>
+						)}
+					</div>
+				) : latestVersion ? (
 					<PostCardContent
-						post={publishedVersion}
-						version="published"
-						className="mx-4"
+						post={latestVersion}
+						version="latest"
+						className="flex-grow"
 					/>
-					{publishedVersion.postVersion < latestVersion.postVersion && (
-						<span className="text-destructive px-6 mt-3">{`Published version is ${latestVersion.postVersion - publishedVersion.postVersion} version${latestVersion.postVersion - publishedVersion.postVersion > 1 ? "s" : ""} behind latest version`}</span>
-					)}
-				</div>
-			) : latestVersion ? (
-				<PostCardContent
-					post={latestVersion}
-					version="latest"
-					className="mx-4"
-				/>
-			) : null}
-			<CardFooter className="flex justify-start gap-2 mt-4">
+				) : null}
+			</CardContent>
+			<CardFooter className="flex-shrink-0 flex flex-wrap justify-start gap-2 mt-4">
 				{latestVersion && (
-					<Collapsible className="flex flex-col gap-3 items-start">
-						<div className="flex justify-start gap-2">
+					<Collapsible className="w-full">
+						<div className="flex flex-wrap justify-start gap-2">
 							{publishedVersion &&
 								latestVersion?.postVersion > publishedVersion?.postVersion && (
 									<CollapsibleTrigger
