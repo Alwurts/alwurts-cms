@@ -164,6 +164,25 @@ export default function Editor({ post }: { post: TPostVersion }) {
 						)}
 					/>
 
+					{/* Action Buttons - Moved here */}
+					<div className="flex gap-4 px-4">
+						<LoadingButton
+							isLoading={savePostVersion.isPending}
+							disabled={savePostVersion.isPending}
+							onClick={form.handleSubmit((data) => onSubmit(data, false))}
+						>
+							Save
+						</LoadingButton>
+						<LoadingButton
+							isLoading={savePostVersion.isPending}
+							disabled={savePostVersion.isPending}
+							variant="outline"
+							onClick={form.handleSubmit((data) => onSubmit(data, true))}
+						>
+							Save and Publish
+						</LoadingButton>
+					</div>
+
 					{/* Attributes section */}
 					<div className="py-4 px-4 rounded-lg space-y-2">
 						<FormField
@@ -385,25 +404,6 @@ export default function Editor({ post }: { post: TPostVersion }) {
 					{/* Content Editor */}
 					<div className="px-4">
 						<SafeMDXEditor ref={editorRef} markdown={post.content} />
-					</div>
-
-					{/* Action Buttons */}
-					<div className="flex gap-4 mt-8">
-						<LoadingButton
-							isLoading={savePostVersion.isPending}
-							disabled={savePostVersion.isPending}
-							onClick={form.handleSubmit((data) => onSubmit(data, false))}
-						>
-							Save
-						</LoadingButton>
-						<LoadingButton
-							isLoading={savePostVersion.isPending}
-							disabled={savePostVersion.isPending}
-							variant="outline"
-							onClick={form.handleSubmit((data) => onSubmit(data, true))}
-						>
-							Save and Publish
-						</LoadingButton>
 					</div>
 				</form>
 			</Form>
