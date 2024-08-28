@@ -1,4 +1,3 @@
-
 import Editor from "./components/Editor";
 import { getLatestPostVersion } from "@/server-actions/postVersions";
 

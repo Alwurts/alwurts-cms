@@ -1,8 +1,6 @@
 "use client";
 
 import { SafeMDXEditor } from "@/components/SafeMDXEditor";
-import { CardLayout } from "@/components/layout/CardLayout";
-import { Button } from "@/components/ui/button";
 import {
 	Form,
 	FormControl,
@@ -145,271 +143,270 @@ export default function Editor({ post }: { post: TPostVersion }) {
 	});
 
 	return (
-		<CardLayout
-			classname="max-w-4xl mx-auto"
-			cardHeaderContent={
-				<Form {...form}>
-					<form ref={formRef} className="flex flex-col gap-10">
-						<div className="grid grid-cols-2 gap-y-2 gap-x-4">
-							<div className="col-span-2 flex gap-2">
-								<LoadingButton
-									isLoading={savePostVersion.isPending}
-									disabled={savePostVersion.isPending}
-									size="sm"
-									onClick={form.handleSubmit((data) => onSubmit(data, false))}
-								>
-									Save
-								</LoadingButton>
-								<LoadingButton
-									isLoading={savePostVersion.isPending}
-									disabled={savePostVersion.isPending}
-									size="sm"
-									variant="outline"
-									onClick={form.handleSubmit((data) => onSubmit(data, true))}
-								>
-									Save and Publish
-								</LoadingButton>
-							</div>
-							<FormField
-								control={form.control}
-								name="title"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Title</FormLabel>
-										<FormControl>
-											<Input placeholder="Post Title" {...field} />
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name="url"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>URL</FormLabel>
-										<FormControl>
-											<Input placeholder="Post URL" {...field} />
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name="description"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Description</FormLabel>
-										<FormControl>
-											<Input placeholder="Post Description" {...field} />
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name="author"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Author</FormLabel>
-										<FormControl>
-											<Input placeholder="Post Author" {...field} />
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-
-							<FormField
-								control={form.control}
-								name="date"
-								render={({ field }) => (
-									<FormItem>
-										<FormLabel>Post Date</FormLabel>
-										<FormControl>
-											<Input
-												placeholder="Post Date"
-												type="date"
-												value={
-													field.value instanceof Date
-														? field.value.toISOString().split("T")[0]
-														: field.value
-												}
-												onChange={(e) => {
-													const date = new Date(e.target.value);
-													field.onChange(date);
-												}}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormItem>
-								<FormLabel>Created at</FormLabel>
-								<Input value={post.createdAt.toLocaleString()} disabled />
+		<div className="max-w-4xl mx-auto py-6 sm:py-8">
+			<Form {...form}>
+				<form ref={formRef} className="flex flex-col gap-4">
+					{/* Title */}
+					<FormField
+						control={form.control}
+						name="title"
+						render={({ field }) => (
+							<FormItem className="px-4">
+								<FormControl>
+									<Input
+										placeholder="Untitled"
+										{...field}
+										className="text-4xl font-bold border-none px-0 focus-visible:ring-0"
+									/>
+								</FormControl>
+								<FormMessage />
 							</FormItem>
-							<FormField
-								control={form.control}
-								name="tags"
-								render={({ field }) => (
-									<FormItem className="col-span-2">
-										<FormLabel>Tags</FormLabel>
-										<FormControl>
-											<TagsFetch
-												fieldValue={
-													field.value.length > 0 ? field.value.split(",") : []
-												}
-												setFieldValue={(tags) => field.onChange(tags.join(","))}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-							<FormField
-								control={form.control}
-								name="links"
-								render={({ field }) => (
-									<FormItem className="col-span-2">
-										<FormLabel>Links</FormLabel>
-										<FormControl>
-											<LinksFetch
-												fieldValue={field.value as Link[] | null}
-												setFieldValue={field.onChange}
-											/>
-										</FormControl>
-										<FormMessage />
-									</FormItem>
-								)}
-							/>
-						</div>
-						<div className="flex justify-around w-full gap-4">
-							<div className="flex gap-6 border border-input rounded-md p-4">
+						)}
+					/>
+
+					{/* Attributes section */}
+					<div className="py-4 px-4 rounded-lg space-y-2">
+						<FormField
+							control={form.control}
+							name="url"
+							render={({ field }) => (
+								<FormItem className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+									<FormLabel className="min-w-[100px]">URL</FormLabel>
+									<FormControl className="flex-1">
+										<Input placeholder="Post URL" {...field} />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name="description"
+							render={({ field }) => (
+								<FormItem className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+									<FormLabel className="min-w-[100px]">Description</FormLabel>
+									<FormControl className="flex-1">
+										<Input placeholder="Post Description" {...field} />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name="author"
+							render={({ field }) => (
+								<FormItem className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+									<FormLabel className="min-w-[100px]">Author</FormLabel>
+									<FormControl className="flex-1">
+										<Input placeholder="Post Author" {...field} />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name="date"
+							render={({ field }) => (
+								<FormItem className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+									<FormLabel className="min-w-[100px]">Post Date</FormLabel>
+									<FormControl className="flex-1">
+										<Input
+											placeholder="Post Date"
+											type="date"
+											value={
+												field.value instanceof Date
+													? field.value.toISOString().split("T")[0]
+													: field.value
+											}
+											onChange={(e) => {
+												const date = new Date(e.target.value);
+												field.onChange(date);
+											}}
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name="tags"
+							render={({ field }) => (
+								<FormItem className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+									<FormLabel className="min-w-[100px]">Tags</FormLabel>
+									<FormControl className="flex-1">
+										<TagsFetch
+											fieldValue={
+												field.value.length > 0 ? field.value.split(",") : []
+											}
+											setFieldValue={(tags) => field.onChange(tags.join(","))}
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name="links"
+							render={({ field }) => (
+								<FormItem className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+									<FormLabel className="min-w-[100px]">Links</FormLabel>
+									<FormControl className="flex-1">
+										<LinksFetch
+											fieldValue={field.value as Link[] | null}
+											setFieldValue={field.onChange}
+										/>
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+					</div>
+
+					{/* Images section */}
+					<div className="flex flex-col sm:flex-row gap-5 px-4">
+						{/* Large Image */}
+						<div className="flex-1 border border-gray-200 rounded-lg p-4">
+							<h3 className="text-lg font-semibold mb-2">Large Image</h3>
+							<div className="flex flex-col gap-4">
 								<Image
 									src={
 										imageLargeWatch
 											? URL.createObjectURL(imageLargeWatch)
 											: post.imageLarge?.url ?? ""
 									}
-									alt="Post image"
+									alt="Post large image"
 									width={200}
 									height={200}
 									className="object-contain h-[200px] w-auto"
 								/>
-
-								<div className="flex flex-col gap-2">
-									<FormField
-										control={form.control}
-										name="imageLarge"
-										render={({ field }) => (
-											<FormItem className="">
-												<FormLabel>Image Large</FormLabel>
-												<FormControl>
-													<Input
-														placeholder="Post Image Large"
-														type="file"
-														accept="image/png, image/jpeg"
-														onChange={(e) => {
-															const file = e.target.files?.[0];
-															field.onChange(file);
-															form.setValue("imageLargeDescription", "");
-														}}
-													/>
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-									<FormField
-										control={form.control}
-										name="imageLargeDescription"
-										render={({ field }) => (
-											<FormItem className="">
-												<FormLabel>Image Large Description</FormLabel>
-												<FormControl>
-													<Input
-														placeholder="Describe the large image"
-														{...field}
-														onChange={(e) => {
-															field.onChange(e);
-															form.clearErrors("imageLargeDescription");
-														}}
-													/>
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-								</div>
+								<FormField
+									control={form.control}
+									name="imageLarge"
+									render={({ field }) => (
+										<FormItem>
+											<FormControl>
+												<Input
+													type="file"
+													accept="image/png, image/jpeg"
+													onChange={(e) => {
+														const file = e.target.files?.[0];
+														field.onChange(file);
+														form.setValue("imageLargeDescription", "");
+													}}
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+								<FormField
+									control={form.control}
+									name="imageLargeDescription"
+									render={({ field }) => (
+										<FormItem>
+											<FormControl>
+												<Input
+													placeholder="Describe the large image"
+													{...field}
+													onChange={(e) => {
+														field.onChange(e);
+														form.clearErrors("imageLargeDescription");
+													}}
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
 							</div>
-							<div className="flex gap-6 border border-input rounded-md p-4">
+						</div>
+						{/* Small Image */}
+						<div className="flex-1 border border-gray-200 rounded-lg p-4">
+							<h3 className="text-lg font-semibold mb-2">Small Image</h3>
+							<div className="flex flex-col gap-4">
 								<Image
 									src={
 										imageSmallWatch
 											? URL.createObjectURL(imageSmallWatch)
 											: post.imageSmall?.url ?? ""
 									}
-									alt="Post image"
+									alt="Post small image"
 									width={200}
 									height={200}
 									className="object-contain h-[200px] w-auto"
 								/>
-
-								<div className="flex flex-col gap-2">
-									<FormField
-										control={form.control}
-										name="imageSmall"
-										render={({ field }) => (
-											<FormItem className="">
-												<FormLabel>Image Small</FormLabel>
-												<FormControl>
-													<Input
-														placeholder="Post Image Small"
-														type="file"
-														accept="image/png, image/jpeg"
-														onChange={(e) => {
-															const file = e.target.files?.[0];
-															field.onChange(file);
-															form.setValue("imageSmallDescription", "");
-														}}
-													/>
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-									<FormField
-										control={form.control}
-										name="imageSmallDescription"
-										render={({ field }) => (
-											<FormItem className="">
-												<FormLabel>Image Small Description</FormLabel>
-												<FormControl>
-													<Input
-														placeholder="Describe the small image"
-														{...field}
-														onChange={(e) => {
-															field.onChange(e);
-															form.clearErrors("imageSmallDescription");
-														}}
-													/>
-												</FormControl>
-												<FormMessage />
-											</FormItem>
-										)}
-									/>
-								</div>
+								<FormField
+									control={form.control}
+									name="imageSmall"
+									render={({ field }) => (
+										<FormItem>
+											<FormControl>
+												<Input
+													type="file"
+													accept="image/png, image/jpeg"
+													onChange={(e) => {
+														const file = e.target.files?.[0];
+														field.onChange(file);
+														form.setValue("imageSmallDescription", "");
+													}}
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+								<FormField
+									control={form.control}
+									name="imageSmallDescription"
+									render={({ field }) => (
+										<FormItem>
+											<FormControl>
+												<Input
+													placeholder="Describe the small image"
+													{...field}
+													onChange={(e) => {
+														field.onChange(e);
+														form.clearErrors("imageSmallDescription");
+													}}
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
 							</div>
 						</div>
-					</form>
-				</Form>
-			}
-		>
-			<SafeMDXEditor ref={editorRef} markdown={post.content} />
-		</CardLayout>
+					</div>
+
+					{/* Content Editor */}
+					<div className="px-4">
+						<SafeMDXEditor ref={editorRef} markdown={post.content} />
+					</div>
+
+					{/* Action Buttons */}
+					<div className="flex gap-4 mt-8">
+						<LoadingButton
+							isLoading={savePostVersion.isPending}
+							disabled={savePostVersion.isPending}
+							onClick={form.handleSubmit((data) => onSubmit(data, false))}
+						>
+							Save
+						</LoadingButton>
+						<LoadingButton
+							isLoading={savePostVersion.isPending}
+							disabled={savePostVersion.isPending}
+							variant="outline"
+							onClick={form.handleSubmit((data) => onSubmit(data, true))}
+						>
+							Save and Publish
+						</LoadingButton>
+					</div>
+				</form>
+			</Form>
+		</div>
 	);
 }

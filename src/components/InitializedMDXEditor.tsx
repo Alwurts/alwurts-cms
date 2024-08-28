@@ -121,7 +121,7 @@ export default function InitializedMDXEditor({
 			]}
 			{...props}
 			ref={editorRef}
-			className={cn("border-2 rounded-xl", props.className)}
+			className={cn(props.className)}
 			contentEditableClassName="prose max-w-none lg:prose-lg dark:prose-invert prose-headings:mb-5"
 		/>
 	);
