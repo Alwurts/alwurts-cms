@@ -1,7 +1,7 @@
 import { db } from "@/database";
-import { posts } from "@/database/schema";
-import type { TCreatePost } from "@/types/database/post";
-import { and, asc, desc, eq, isNotNull } from "drizzle-orm";
+import { posts, postVersions } from "@/database/schema";
+import type { TCreatePost, TPost } from "@/types/database/post";
+import { and, asc, desc, eq, isNotNull, sql } from "drizzle-orm";
 import "server-only";
 
 export const createPost = async (post: TCreatePost) => {
@@ -18,18 +18,14 @@ export const updatePost = async (postId: string, post: TCreatePost) => {
 	return result[0];
 };
 
-export const getPosts = async () => {
+export type SortOption = "title" | "date" | "url" | "tags";
+export type SortDirection = "asc" | "desc";
+
+export const getPosts = async (sort: SortOption = "url", direction: SortDirection = "asc"): Promise<TPost[]> => {
 	const result = await db.query.posts.findMany({
 		with: {
 			tags: true,
 			versions: true,
-			publishedVersion: {
-				with: {
-					imageLarge: true,
-					imageSmall: true,
-					tags: true,
-				},
-			},
 			latestVersion: {
 				with: {
 					imageLarge: true,
@@ -37,11 +33,48 @@ export const getPosts = async () => {
 					tags: true,
 				},
 			},
+			publishedVersion: {
+				with: {
+					imageLarge: true,
+					imageSmall: true,
+					tags: true,
+				},
+			},
 		},
-		orderBy: asc(posts.url),
 	});
-	return result;
+
+	return sortPosts(result, sort, direction);
 };
+
+function sortPosts(posts: TPost[], sort: SortOption, direction: SortDirection): TPost[] {
+	return [...posts].sort((a, b) => {
+		let comparison = 0;
+		switch (sort) {
+			case "title": {
+				const aTitle = a.publishedVersion?.title || a.latestVersion?.title || "";
+				const bTitle = b.publishedVersion?.title || b.latestVersion?.title || "";
+				comparison = aTitle.localeCompare(bTitle);
+				break;
+			}
+			case "date": {
+				const aDate = a.publishedVersion?.date || a.latestVersion?.date || new Date(0);
+				const bDate = b.publishedVersion?.date || b.latestVersion?.date || new Date(0);
+				comparison = aDate.getTime() - bDate.getTime();
+				break;
+			}
+			case "url":
+				comparison = (a.url || "").localeCompare(b.url || "");
+				break;
+			case "tags": {
+				const aTags = a.publishedVersion?.tags || a.latestVersion?.tags || [];
+				const bTags = b.publishedVersion?.tags || b.latestVersion?.tags || [];
+				comparison = aTags.length - bTags.length;
+				break;
+			}
+		}
+		return direction === "asc" ? comparison : -comparison;
+	});
+}
 
 export const getPublishedPosts = async () => {
 	const result = await db.query.posts.findMany({

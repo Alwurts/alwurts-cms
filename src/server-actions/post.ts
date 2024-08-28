@@ -7,8 +7,8 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 import { unstable_cache } from "next/cache";
 
-export const getPosts = withAuthCheck(async () => {
-	return await postsProxy.getPosts();
+export const getPosts = withAuthCheck(async (_, sort: postsProxy.SortOption = "url", direction: postsProxy.SortDirection = "asc") => {
+	return await postsProxy.getPosts(sort, direction);
 });
 
 export const createPost = withAuthCheck(async () => {
