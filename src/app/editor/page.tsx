@@ -1,25 +1,17 @@
+export const dynamic = "force-dynamic";
+
 import { getPosts } from "@/server-actions/post";
 import CreateButton from "./components/CreateButton";
-import dynamic from "next/dynamic";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
-  Table,
-  TableBody,
-  TableHead,
-  TableHeader,
-  TableRow,
+	Table,
+	TableBody,
+	TableHead,
+	TableHeader,
+	TableRow,
 } from "@/components/ui/table";
-
-const PostCard = dynamic(() => import("./components/PostCard"), {
-	loading: () => <Skeleton className="w-full h-[300px]" />,
-	ssr: false,
-});
-
-const PostTableRow = dynamic(() => import("./components/PostTable"), {
-	loading: () => <Skeleton className="w-full h-[50px]" />,
-	ssr: false,
-});
+import PostCard from "./components/PostCard";
+import PostTableRow from "./components/PostTable";
 
 export default async function CMSPostsPage() {
 	const posts = await getPosts();
