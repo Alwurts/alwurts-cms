@@ -19,16 +19,19 @@ export function TagsFetch({
 	fieldValue,
 	setFieldValue,
 }: {
-	fieldValue: string[];
-	setFieldValue: (value: string[]) => void;
+	fieldValue: string | undefined;
+	setFieldValue: (value: string) => void;
 }) {
+	const [tags, setTags] = useState<string[]>(
+		fieldValue ? JSON.parse(fieldValue) : [],
+	);
 	const [isOpen, setOpen] = useState(false);
 	const [searchValue, setSearchValue] = useState("");
 	const [debouncedSearchValue] = useDebounce(searchValue, 300);
 	const inputRef = useRef<HTMLInputElement>(null);
 
 	const {
-		data: tags,
+		data: tagsData,
 		isFetching,
 		refetch,
 	} = useQuery({
@@ -64,36 +67,41 @@ export function TagsFetch({
 	}, [isOpen]);
 
 	const addTag = (tagName: string) => {
-		if (!fieldValue.includes(tagName)) {
-			setFieldValue([...fieldValue, tagName]);
+		if (!tags.includes(tagName)) {
+			const newTags = [...tags, tagName];
+			setTags(newTags);
+			setFieldValue(JSON.stringify(newTags));
 		}
 	};
 
 	const removeTag = (tagToRemove: string) => {
-		setFieldValue(fieldValue.filter((tag) => tag !== tagToRemove));
+		const newTags = tags.filter((tag) => tag !== tagToRemove);
+		setTags(newTags);
+		setFieldValue(JSON.stringify(newTags));
 	};
 
 	const handleCreateTag = () => {
-		if (searchValue && !fieldValue.includes(searchValue)) {
+		if (searchValue && !tags.includes(searchValue)) {
 			createTag.mutate({ name: searchValue });
 		}
 	};
 
 	const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-		if (e.key === 'Enter') {
+		if (e.key === "Enter") {
 			e.preventDefault();
 			handleCreateTag();
 		}
 	};
 
-	const filteredTags = tags?.filter(tag => !fieldValue.includes(tag.name)) || [];
+	const filteredTags =
+		tagsData?.filter((tag) => !tags.includes(tag.name)) || [];
 
 	return (
 		<Popover open={isOpen} onOpenChange={setOpen}>
 			<PopoverTrigger asChild>
 				<div className="flex flex-wrap gap-2 cursor-pointer min-h-[2.5rem] items-center border rounded-md p-2 hover:bg-gray-50 transition-colors">
-					{fieldValue.length > 0 ? (
-						fieldValue.map((tag) => (
+					{tags.length > 0 ? (
+						tags.map((tag) => (
 							<Button
 								key={tag}
 								variant="secondary"
@@ -124,9 +132,9 @@ export function TagsFetch({
 							<Plus className="h-4 w-4" />
 						</Button>
 					</div>
-					{fieldValue.length > 0 && (
+					{tags.length > 0 && (
 						<div className="flex flex-wrap gap-2 pb-2 border-b">
-							{fieldValue.map((tag) => (
+							{tags.map((tag) => (
 								<Button
 									key={tag}
 									variant="secondary"

@@ -26,11 +26,6 @@ import {
 } from "@/components/ui/accordion";
 import { Button, buttonVariants } from "@/components/ui/button";
 import Link from "next/link";
-import {
-	markPublishedVersionAsFeatured,
-	publishLatestVersion,
-	unpublish,
-} from "@/server-actions/postVersions";
 import { useMutation } from "@tanstack/react-query";
 import { cn } from "@/lib/utils";
 import {
@@ -41,6 +36,11 @@ import {
 import { StarFilledIcon } from "@/components/icons/StartFilledIcon";
 import { StarOutlineIcon } from "@/components/icons/StartOutlineIcon";
 import LoadingButton from "@/components/ui/loading-button";
+import {
+	markPublishedVersionAsFeatured,
+	publishLatestVersion,
+	unpublishLatestVersion,
+} from "@/server-actions/post";
 
 export default function PostCards({ posts }: { posts: TPost[] }) {
 	return (
@@ -54,14 +54,16 @@ export default function PostCards({ posts }: { posts: TPost[] }) {
 				});
 
 				const handleUnpublish = useMutation({
-					mutationFn: unpublish,
+					mutationFn: unpublishLatestVersion,
 				});
 
 				const handleMarkPublishedVersionAsFeatured = useMutation({
 					mutationFn: markPublishedVersionAsFeatured,
 				});
 
-				const hasNewerVersion = post.latestVersion && post.publishedVersion && 
+				const hasNewerVersion =
+					post.latestVersion &&
+					post.publishedVersion &&
 					post.latestVersion.postVersion > post.publishedVersion.postVersion;
 
 				return (
@@ -74,7 +76,9 @@ export default function PostCards({ posts }: { posts: TPost[] }) {
 						<CardHeader className="flex-shrink-0">
 							<CardTitle className="text-base font-medium capitalize flex justify-between items-center">
 								<span className="truncate">{version.title}</span>
-								<Badge variant={post.publishedVersion ? "default" : "secondary"}>
+								<Badge
+									variant={post.publishedVersion ? "default" : "secondary"}
+								>
 									{post.publishedVersion ? "Published" : "Draft"}
 								</Badge>
 							</CardTitle>
@@ -89,7 +93,9 @@ export default function PostCards({ posts }: { posts: TPost[] }) {
 
 									<div className="flex items-center space-x-2 text-sm">
 										<CalendarIcon className="w-4 h-4" />
-										<span>Date: {new Date(version.date).toLocaleDateString()}</span>
+										<span>
+											Date: {new Date(version.date).toLocaleDateString()}
+										</span>
 									</div>
 									<div className="flex items-center space-x-2 text-sm">
 										<User2Icon className="w-4 h-4" />
@@ -105,9 +111,16 @@ export default function PostCards({ posts }: { posts: TPost[] }) {
 										))}
 									</div>
 								</div>
-								<Accordion type="single" collapsible className="w-full text-sm" defaultValue="small-image">
+								<Accordion
+									type="single"
+									collapsible
+									className="w-full text-sm"
+									defaultValue="small-image"
+								>
 									<AccordionItem value="small-image">
-										<AccordionTrigger className="py-2">Small Image</AccordionTrigger>
+										<AccordionTrigger className="py-2">
+											Small Image
+										</AccordionTrigger>
 										<AccordionContent>
 											<div className="flex flex-col items-start gap-2">
 												{version.imageSmall ? (
@@ -125,7 +138,9 @@ export default function PostCards({ posts }: { posts: TPost[] }) {
 										</AccordionContent>
 									</AccordionItem>
 									<AccordionItem value="large-image">
-										<AccordionTrigger className="py-2">Large Image</AccordionTrigger>
+										<AccordionTrigger className="py-2">
+											Large Image
+										</AccordionTrigger>
 										<AccordionContent>
 											<div className="flex flex-col items-start gap-2">
 												{version.imageLarge ? (
@@ -172,7 +187,9 @@ export default function PostCards({ posts }: { posts: TPost[] }) {
 										size="sm"
 										variant="outline"
 										isLoading={handleMarkPublishedVersionAsFeatured.isPending}
-										onClick={() => handleMarkPublishedVersionAsFeatured.mutate(post.id)}
+										onClick={() =>
+											handleMarkPublishedVersionAsFeatured.mutate(post.id)
+										}
 									>
 										{post.publishedVersion?.isFeatured ? (
 											<StarFilledIcon className="w-4 h-4 text-yellow-500" />

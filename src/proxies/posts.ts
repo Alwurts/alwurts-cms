@@ -1,27 +1,211 @@
 import { db } from "@/database";
-import { posts, postVersions } from "@/database/schema";
-import type { TCreatePost, TPost } from "@/types/database/post";
-import { and, asc, desc, eq, isNotNull, sql } from "drizzle-orm";
+import { posts, postsVersionsToTags, postVersions } from "@/database/schema";
+import * as filesProxy from "@/proxies/files";
+import type { TPost } from "@/types/database/post";
+import { PostEditorFormSchema } from "@/zod/post";
+import { linksSchema } from "@/zod/postLinks";
+import { tagsSchema } from "@/zod/postTags";
+import { and, eq, isNotNull } from "drizzle-orm";
 import "server-only";
 
-export const createPost = async (post: TCreatePost) => {
-	const result = await db.insert(posts).values(post).returning();
+export const createPost = async (type: "project" | "blog") => {
+	const newPostResult = await db
+		.insert(posts)
+		.values({
+			type,
+			url: `new-post-${new Date().getTime()}`,
+			latestVersionId: 1,
+		})
+		.returning();
+
+	const newPost = newPostResult[0];
+
+	await db
+		.insert(postVersions)
+		.values({
+			postId: newPost.id,
+			url: newPost.url,
+			title: "New Post",
+			description: "New Post Description",
+			content: "New Post Content",
+			author: "Alwurts",
+			date: new Date(),
+			postVersion: 1,
+			createdAt: new Date(),
+			isFeatured: false,
+			imageLargeId: null,
+			imageSmallId: null,
+		})
+		.returning();
+
+	return newPost;
+};
+
+export const updatePost = async (formData: FormData) => {
+	const postFormData = Object.fromEntries(formData);
+	const postData = PostEditorFormSchema.parse(postFormData);
+
+	const { tags: tagsJson, ...postDataRest } = postData;
+
+	const post = await getPostById(postData.postId);
+	const previousLatestVersion = post?.latestVersion;
+
+	if (!previousLatestVersion) {
+		throw new Error("Post not found");
+	}
+
+	const imageLargeId = await filesProxy.handleImageUpdate(
+		postDataRest.imageLarge,
+		postDataRest.imageLargeDescription,
+		previousLatestVersion?.imageLargeId,
+	);
+
+	const imageSmallId = await filesProxy.handleImageUpdate(
+		postDataRest.imageSmall,
+		postDataRest.imageSmallDescription,
+		previousLatestVersion?.imageSmallId,
+	);
+
+	const tags = tagsSchema.parse(
+		typeof tagsJson === "string" ? JSON.parse(tagsJson) : [],
+	);
+
+	const links = linksSchema.parse(
+		typeof postDataRest.links === "string"
+			? JSON.parse(postDataRest.links)
+			: [],
+	);
+
+	const newPostVersionResult = await db
+		.insert(postVersions)
+		.values({
+			author: postDataRest.author,
+			date: new Date(postDataRest.date),
+			title: postDataRest.title,
+			description: postDataRest.description,
+			content: postDataRest.content,
+			links: links,
+			postId: postDataRest.postId,
+			url: postDataRest.url,
+			postVersion: previousLatestVersion.postVersion + 1,
+			isFeatured: previousLatestVersion?.isFeatured,
+			imageLargeId: imageLargeId ?? previousLatestVersion?.imageLargeId,
+			imageSmallId: imageSmallId ?? previousLatestVersion?.imageSmallId,
+			createdAt: new Date(),
+		})
+		.returning();
+
+	const newPostVersion = newPostVersionResult[0];
+
+	if (tags && tags.length > 0) {
+		await db.insert(postsVersionsToTags).values(
+			tags.map((tag) => ({
+				postId: postDataRest.postId,
+				postVersion: newPostVersion.postVersion,
+				tagName: tag,
+			})),
+		);
+	}
+
+	const updatePostResult = await db
+		.update(posts)
+		.set({
+			latestVersionId: newPostVersion.postVersion,
+		})
+		.where(eq(posts.id, postDataRest.postId))
+		.returning();
+	return updatePostResult[0];
+};
+
+export const publishLatestVersion = async (postId: string) => {
+	const post = await getPostById(postId);
+	const latestVersion = post?.latestVersion;
+
+	if (!latestVersion) {
+		throw new Error("No latest version found");
+	}
+
+	const result = await db
+		.update(posts)
+		.set({
+			publishedVersionId: latestVersion.postVersion,
+			url: latestVersion.url,
+		})
+		.where(eq(posts.id, postId))
+		.returning();
+
+	await db
+		.update(postVersions)
+		.set({
+			publishedAt: new Date(),
+		})
+		.where(
+			and(
+				eq(postVersions.postId, postId),
+				eq(postVersions.postVersion, latestVersion.postVersion),
+			),
+		);
 	return result[0];
 };
 
-export const updatePost = async (postId: string, post: TCreatePost) => {
+export const unpublishLatestVersion = async (postId: string) => {
 	const result = await db
 		.update(posts)
-		.set(post)
+		.set({
+			publishedVersionId: null,
+		})
 		.where(eq(posts.id, postId))
 		.returning();
 	return result[0];
 };
 
+export const markPublishedVersionAsFeatured = async (postId: string) => {
+	const post = await getPostById(postId);
+	const publishedVersion = post?.publishedVersion;
+
+	const result = await db
+		.update(postVersions)
+		.set({
+			isFeatured: !publishedVersion?.isFeatured,
+		})
+		.where(eq(postVersions.postId, postId))
+		.returning();
+
+	return result[0];
+};
+
+export const getPostById = async (postId: string): Promise<TPost | null> => {
+	const result = await db.query.posts.findFirst({
+		where: eq(posts.id, postId),
+		with: {
+			tags: true,
+			versions: true,
+			latestVersion: {
+				with: {
+					imageLarge: true,
+					imageSmall: true,
+					tags: true,
+				},
+			},
+			publishedVersion: {
+				with: {
+					imageLarge: true,
+					imageSmall: true,
+					tags: true,
+				},
+			},
+		},
+	});
+	return result ?? null;
+};
+
 export type SortOption = "title" | "date" | "url" | "tags";
 export type SortDirection = "asc" | "desc";
 
-export const getPosts = async (sort: SortOption = "url", direction: SortDirection = "asc"): Promise<TPost[]> => {
+export const getPosts = async (
+	sort: SortOption = "url",
+	direction: SortDirection = "asc",
+): Promise<TPost[]> => {
 	const result = await db.query.posts.findMany({
 		with: {
 			tags: true,
@@ -43,38 +227,46 @@ export const getPosts = async (sort: SortOption = "url", direction: SortDirectio
 		},
 	});
 
+	function sortPosts(
+		posts: TPost[],
+		sort: SortOption,
+		direction: SortDirection,
+	): TPost[] {
+		return [...posts].sort((a, b) => {
+			let comparison = 0;
+			switch (sort) {
+				case "title": {
+					const aTitle =
+						a.publishedVersion?.title || a.latestVersion?.title || "";
+					const bTitle =
+						b.publishedVersion?.title || b.latestVersion?.title || "";
+					comparison = aTitle.localeCompare(bTitle);
+					break;
+				}
+				case "date": {
+					const aDate =
+						a.publishedVersion?.date || a.latestVersion?.date || new Date(0);
+					const bDate =
+						b.publishedVersion?.date || b.latestVersion?.date || new Date(0);
+					comparison = aDate.getTime() - bDate.getTime();
+					break;
+				}
+				case "url":
+					comparison = (a.url || "").localeCompare(b.url || "");
+					break;
+				case "tags": {
+					const aTags = a.publishedVersion?.tags || a.latestVersion?.tags || [];
+					const bTags = b.publishedVersion?.tags || b.latestVersion?.tags || [];
+					comparison = aTags.length - bTags.length;
+					break;
+				}
+			}
+			return direction === "asc" ? comparison : -comparison;
+		});
+	}
+
 	return sortPosts(result, sort, direction);
 };
-
-function sortPosts(posts: TPost[], sort: SortOption, direction: SortDirection): TPost[] {
-	return [...posts].sort((a, b) => {
-		let comparison = 0;
-		switch (sort) {
-			case "title": {
-				const aTitle = a.publishedVersion?.title || a.latestVersion?.title || "";
-				const bTitle = b.publishedVersion?.title || b.latestVersion?.title || "";
-				comparison = aTitle.localeCompare(bTitle);
-				break;
-			}
-			case "date": {
-				const aDate = a.publishedVersion?.date || a.latestVersion?.date || new Date(0);
-				const bDate = b.publishedVersion?.date || b.latestVersion?.date || new Date(0);
-				comparison = aDate.getTime() - bDate.getTime();
-				break;
-			}
-			case "url":
-				comparison = (a.url || "").localeCompare(b.url || "");
-				break;
-			case "tags": {
-				const aTags = a.publishedVersion?.tags || a.latestVersion?.tags || [];
-				const bTags = b.publishedVersion?.tags || b.latestVersion?.tags || [];
-				comparison = aTags.length - bTags.length;
-				break;
-			}
-		}
-		return direction === "asc" ? comparison : -comparison;
-	});
-}
 
 export const getPublishedPosts = async () => {
 	const result = await db.query.posts.findMany({

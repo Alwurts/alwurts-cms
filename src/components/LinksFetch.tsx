@@ -16,9 +16,12 @@ export function LinksFetch({
 	fieldValue,
 	setFieldValue,
 }: {
-	fieldValue: Link[] | null;
-	setFieldValue: (value: Link[]) => void;
+	fieldValue: string | undefined;
+	setFieldValue: (value: string) => void;
 }) {
+	const [links, setLinks] = useState<Link[]>(
+		fieldValue ? JSON.parse(fieldValue) : [],
+	);
 	const [isOpen, setOpen] = useState(false);
 	const [newLink, setNewLink] = useState({ title: "", url: "" });
 	const [editingLink, setEditingLink] = useState<Link | null>(null);
@@ -34,24 +37,26 @@ export function LinksFetch({
 		const linkToSave = editingLink || newLink;
 		const linkResult = linkSchema.safeParse(linkToSave);
 		if (linkResult.success) {
+			let newLinks: Link[];
 			if (editingLink) {
-				setFieldValue(
-					(fieldValue || []).map((link) =>
-						link.url === editingLink.url ? linkResult.data : link
-					)
+				newLinks = links.map((link) =>
+					link.url === editingLink.url ? linkResult.data : link,
 				);
 				setEditingLink(null);
 				toast({
 					title: "Link updated",
 					description: "Link updated successfully",
 				});
+				setFieldValue(JSON.stringify(newLinks));
 			} else {
-				setFieldValue([...(fieldValue || []), linkResult.data]);
+				newLinks = [...links, linkResult.data];
 				toast({
 					title: "Link added",
 					description: "Link added successfully",
 				});
+				setFieldValue(JSON.stringify(newLinks));
 			}
+			setLinks(newLinks);
 			setNewLink({ title: "", url: "" });
 		} else {
 			toast({
@@ -63,7 +68,9 @@ export function LinksFetch({
 	};
 
 	const removeLink = (linkToRemove: Link) => {
-		setFieldValue((fieldValue || []).filter((link) => link.url !== linkToRemove.url));
+		const newLinks = links.filter((link) => link.url !== linkToRemove.url);
+		setLinks(newLinks);
+		setFieldValue(JSON.stringify(newLinks));
 		if (editingLink && editingLink.url === linkToRemove.url) {
 			setEditingLink(null);
 			setNewLink({ title: "", url: "" });
@@ -81,7 +88,7 @@ export function LinksFetch({
 	};
 
 	const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-		if (e.key === 'Enter') {
+		if (e.key === "Enter") {
 			e.preventDefault();
 			addOrUpdateLink();
 		}
@@ -91,8 +98,8 @@ export function LinksFetch({
 		<Popover open={isOpen} onOpenChange={setOpen}>
 			<PopoverTrigger asChild>
 				<div className="flex flex-wrap gap-2 cursor-pointer min-h-[2.5rem] items-center border rounded-md p-2 hover:bg-gray-50 transition-colors">
-					{fieldValue && fieldValue.length > 0 ? (
-						fieldValue.map((link) => (
+					{links.length > 0 ? (
+						links.map((link) => (
 							<Button
 								key={link.url}
 								variant="secondary"
@@ -114,7 +121,9 @@ export function LinksFetch({
 							ref={inputRef}
 							placeholder="Link title"
 							value={newLink.title}
-							onChange={(e) => setNewLink({ ...newLink, title: e.target.value })}
+							onChange={(e) =>
+								setNewLink({ ...newLink, title: e.target.value })
+							}
 							onKeyDown={handleKeyDown}
 						/>
 						<Input
@@ -123,13 +132,13 @@ export function LinksFetch({
 							onChange={(e) => setNewLink({ ...newLink, url: e.target.value })}
 							onKeyDown={handleKeyDown}
 						/>
-						<Button 
-							size="sm" 
-							onClick={addOrUpdateLink} 
+						<Button
+							size="sm"
+							onClick={addOrUpdateLink}
 							disabled={!newLink.title || !newLink.url}
 						>
-							<Plus className="h-4 w-4 mr-2" /> 
-							{editingLink ? 'Update Link' : 'Add Link'}
+							<Plus className="h-4 w-4 mr-2" />
+							{editingLink ? "Update Link" : "Add Link"}
 						</Button>
 						{editingLink && (
 							<Button size="sm" variant="outline" onClick={cancelEditing}>
@@ -137,9 +146,9 @@ export function LinksFetch({
 							</Button>
 						)}
 					</div>
-					{fieldValue && fieldValue.length > 0 && (
+					{links.length > 0 && (
 						<div className="flex flex-wrap gap-2 pb-2 border-b">
-							{fieldValue.map((link) => (
+							{links.map((link) => (
 								<div key={link.url} className="flex items-center">
 									<Button
 										variant="secondary"

@@ -11,28 +11,32 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import type { MDXEditorMethods } from "@mdxeditor/editor";
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { z } from "zod";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "@/components/ui/use-toast";
 import { TagsFetch } from "@/components/TagsFetch";
-import { createPostVersion } from "@/server-actions/postVersions";
-import type { TPostVersion } from "@/types/database/postVersion";
 import Image from "next/image";
-import { PostVersionSchema } from "@/zod/postVersion";
 import { LinksFetch } from "@/components/LinksFetch";
-import type { Link } from "@/zod/postLinks";
 import LoadingButton from "@/components/ui/loading-button";
+import type { TPost } from "@/types/database/post";
+import { updatePost } from "@/server-actions/post";
+import { PostEditorFormSchema } from "@/zod/post";
 
-export default function Editor({ post }: { post: TPostVersion }) {
+export default function Editor({
+	post,
+}: {
+	post: TPost;
+}) {
 	const editorRef = useRef<MDXEditorMethods>(null);
-	const [editorIsDirty, setEditorIsDirty] = useState(false);
 	const formRef = useRef<HTMLFormElement>(null);
 
+	const { latestVersion } = post;
+
 	const savePostVersion = useMutation({
-		mutationFn: createPostVersion,
+		mutationFn: updatePost,
 		onSuccess: () => {
 			toast({
 				title: "Post saved",
@@ -41,35 +45,42 @@ export default function Editor({ post }: { post: TPostVersion }) {
 		},
 	});
 
-	const form = useForm<z.infer<typeof PostVersionSchema>>({
-		resolver: zodResolver(PostVersionSchema),
+	console.log(
+		"date",
+		latestVersion?.date ? latestVersion.date.toISOString().split("T")[0] : "",
+	);
+
+	const form = useForm<z.infer<typeof PostEditorFormSchema>>({
+		resolver: zodResolver(PostEditorFormSchema),
 		defaultValues: {
-			postId: post.postId,
-			url: post.url,
-			title: post.title,
-			description: post.description,
-			content: post.content,
-			author: post.author,
-			date: post.date,
-			tags: post.tags.reduce(
-				(acc, tag, index, array) =>
-					`${acc}${tag.tagName}${index < array.length - 1 ? "," : ""}`,
-				"",
-			),
+			postId: latestVersion?.postId,
+			url: latestVersion?.url,
+			title: latestVersion?.title,
+			description: latestVersion?.description,
+			content: latestVersion?.content,
+			author: latestVersion?.author,
+			date: latestVersion?.date
+				? latestVersion.date.toISOString().split("T")[0]
+				: "",
+			tags: latestVersion?.tags
+				? JSON.stringify(latestVersion.tags.map((tag) => tag.tagName))
+				: "",
+			links: latestVersion?.links
+				? JSON.stringify(latestVersion.links)
+				: undefined,
 			imageLarge: undefined,
-			imageLargeDescription: post.imageLarge?.description || "",
+			imageLargeDescription: latestVersion?.imageLarge?.description || "",
 			imageSmall: undefined,
-			imageSmallDescription: post.imageSmall?.description || "",
-			links:
-				typeof post.links === "string" ? JSON.parse(post.links) : post.links,
+			imageSmallDescription: latestVersion?.imageSmall?.description || "",
 		},
 	});
 
+	if (!latestVersion) {
+		return <div>No post latest version found</div>;
+	}
+
 	// Modify the onSubmit function to accept a publish parameter
-	function onSubmit(
-		values: z.infer<typeof PostVersionSchema>,
-		publish: boolean,
-	) {
+	function onSubmit(values: z.infer<typeof PostEditorFormSchema>) {
 		const content = editorRef.current?.getMarkdown();
 		if (!content) {
 			toast({
@@ -102,12 +113,7 @@ export default function Editor({ post }: { post: TPostVersion }) {
 		formData.append("description", values.description);
 		formData.append("content", content);
 		formData.append("author", values.author);
-		formData.append(
-			"date",
-			values.date instanceof Date ? values.date.toISOString() : values.date,
-		);
-
-		formData.append("tags", values.tags);
+		formData.append("date", values.date);
 
 		if (values.imageLarge) {
 			formData.append("imageLarge", values.imageLarge);
@@ -122,11 +128,11 @@ export default function Editor({ post }: { post: TPostVersion }) {
 		if (values.imageSmallDescription) {
 			formData.append("imageSmallDescription", values.imageSmallDescription);
 		}
-
-		formData.append("links", JSON.stringify(values.links));
-
-		if (publish) {
-			formData.append("publish", publish.toString());
+		if (values.tags) {
+			formData.append("tags", values.tags);
+		}
+		if (values.links) {
+			formData.append("links", values.links);
 		}
 
 		savePostVersion.mutate(formData);
@@ -169,18 +175,18 @@ export default function Editor({ post }: { post: TPostVersion }) {
 						<LoadingButton
 							isLoading={savePostVersion.isPending}
 							disabled={savePostVersion.isPending}
-							onClick={form.handleSubmit((data) => onSubmit(data, false))}
+							onClick={form.handleSubmit(onSubmit)}
 						>
 							Save
 						</LoadingButton>
-						<LoadingButton
+						{/* <LoadingButton
 							isLoading={savePostVersion.isPending}
 							disabled={savePostVersion.isPending}
 							variant="outline"
 							onClick={form.handleSubmit((data) => onSubmit(data, true))}
 						>
 							Save and Publish
-						</LoadingButton>
+						</LoadingButton> */}
 					</div>
 
 					{/* Attributes section */}
@@ -234,14 +240,10 @@ export default function Editor({ post }: { post: TPostVersion }) {
 										<Input
 											placeholder="Post Date"
 											type="date"
-											value={
-												field.value instanceof Date
-													? field.value.toISOString().split("T")[0]
-													: field.value
-											}
+											value={field.value}
 											onChange={(e) => {
 												const date = new Date(e.target.value);
-												field.onChange(date);
+												field.onChange(e.target.value);
 											}}
 										/>
 									</FormControl>
@@ -257,10 +259,8 @@ export default function Editor({ post }: { post: TPostVersion }) {
 									<FormLabel className="min-w-[100px]">Tags</FormLabel>
 									<FormControl className="flex-1">
 										<TagsFetch
-											fieldValue={
-												field.value.length > 0 ? field.value.split(",") : []
-											}
-											setFieldValue={(tags) => field.onChange(tags.join(","))}
+											fieldValue={field.value}
+											setFieldValue={field.onChange}
 										/>
 									</FormControl>
 									<FormMessage />
@@ -275,7 +275,7 @@ export default function Editor({ post }: { post: TPostVersion }) {
 									<FormLabel className="min-w-[100px]">Links</FormLabel>
 									<FormControl className="flex-1">
 										<LinksFetch
-											fieldValue={field.value as Link[] | null}
+											fieldValue={field.value}
 											setFieldValue={field.onChange}
 										/>
 									</FormControl>
@@ -283,6 +283,43 @@ export default function Editor({ post }: { post: TPostVersion }) {
 								</FormItem>
 							)}
 						/>
+						{/* <FormItem className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+							<FormLabel className="min-w-[100px]">Post Type</FormLabel>
+							<AlertDialog>
+								<AlertDialogTrigger asChild>
+									<Select
+										value={currentPostType}
+										onValueChange={(value: "project" | "blog") =>
+											setCurrentPostType(value)
+										}
+									>
+										<SelectTrigger className="w-[180px]">
+											<SelectValue placeholder="Select post type" />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="project">Project</SelectItem>
+											<SelectItem value="blog">Blog</SelectItem>
+										</SelectContent>
+									</Select>
+								</AlertDialogTrigger>
+								<AlertDialogContent>
+									<AlertDialogHeader>
+										<AlertDialogTitle>Are you sure?</AlertDialogTitle>
+										<AlertDialogDescription>
+											Changing the post type may affect how the post is
+											displayed and managed.
+										</AlertDialogDescription>
+									</AlertDialogHeader>
+									<AlertDialogFooter>
+										<AlertDialogCancel>Cancel</AlertDialogCancel>
+										<AlertDialogAction
+										>
+											Continue
+										</AlertDialogAction>
+									</AlertDialogFooter>
+								</AlertDialogContent>
+							</AlertDialog>
+						</FormItem> */}
 					</div>
 
 					{/* Images section */}
@@ -295,7 +332,7 @@ export default function Editor({ post }: { post: TPostVersion }) {
 									src={
 										imageLargeWatch
 											? URL.createObjectURL(imageLargeWatch)
-											: post.imageLarge?.url ?? ""
+											: latestVersion?.imageLarge?.url ?? ""
 									}
 									alt="Post large image"
 									width={200}
@@ -351,7 +388,7 @@ export default function Editor({ post }: { post: TPostVersion }) {
 									src={
 										imageSmallWatch
 											? URL.createObjectURL(imageSmallWatch)
-											: post.imageSmall?.url ?? ""
+											: latestVersion?.imageSmall?.url ?? ""
 									}
 									alt="Post small image"
 									width={200}
@@ -403,7 +440,10 @@ export default function Editor({ post }: { post: TPostVersion }) {
 
 					{/* Content Editor */}
 					<div className="px-4">
-						<SafeMDXEditor ref={editorRef} markdown={post.content} />
+						<SafeMDXEditor
+							ref={editorRef}
+							markdown={latestVersion?.content ?? "Loading..."}
+						/>
 					</div>
 				</form>
 			</Form>

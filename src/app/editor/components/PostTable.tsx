@@ -2,7 +2,14 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { TableCell, TableRow, Table, TableBody, TableHeader, TableHead } from "@/components/ui/table";
+import {
+	TableCell,
+	TableRow,
+	Table,
+	TableBody,
+	TableHeader,
+	TableHead,
+} from "@/components/ui/table";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -14,8 +21,8 @@ import Link from "next/link";
 import {
 	markPublishedVersionAsFeatured,
 	publishLatestVersion,
-	unpublish,
-} from "@/server-actions/postVersions";
+	unpublishLatestVersion,
+} from "@/server-actions/post";
 import { useMutation } from "@tanstack/react-query";
 import type { TPost } from "@/types/database/post";
 import { StarFilledIcon } from "@/components/icons/StartFilledIcon";
@@ -51,20 +58,24 @@ function PostTableRow({ post }: { post: TPost }) {
 	});
 
 	const handleUnpublish = useMutation({
-		mutationFn: unpublish,
+		mutationFn: unpublishLatestVersion,
 	});
 
 	const handleMarkPublishedVersionAsFeatured = useMutation({
 		mutationFn: markPublishedVersionAsFeatured,
 	});
 
-	const hasNewerVersion = post.latestVersion && post.publishedVersion && 
+	const hasNewerVersion =
+		post.latestVersion &&
+		post.publishedVersion &&
 		post.latestVersion.postVersion > post.publishedVersion.postVersion;
 
 	return (
 		<TableRow>
 			<TableCell className="font-medium">
-				{post.publishedVersion?.title || post.latestVersion?.title || "Untitled"}
+				{post.publishedVersion?.title ||
+					post.latestVersion?.title ||
+					"Untitled"}
 			</TableCell>
 			<TableCell>
 				{post.publishedVersion?.url || post.latestVersion?.url}
@@ -86,7 +97,9 @@ function PostTableRow({ post }: { post: TPost }) {
 				{post.publishedVersion?.author || post.latestVersion?.author}
 			</TableCell>
 			<TableCell>
-				{new Date(post.publishedVersion?.date || post.latestVersion?.date || 0).toLocaleDateString()}
+				{new Date(
+					post.publishedVersion?.date || post.latestVersion?.date || 0,
+				).toLocaleDateString()}
 			</TableCell>
 			<TableCell>
 				{post.publishedVersion?.isFeatured ? (
@@ -121,12 +134,16 @@ function PostTableRow({ post }: { post: TPost }) {
 						)}
 						{post.publishedVersion && (
 							<>
-								<DropdownMenuItem onClick={() => handleUnpublish.mutate(post.id)}>
+								<DropdownMenuItem
+									onClick={() => handleUnpublish.mutate(post.id)}
+								>
 									<XCircle className="mr-2 h-4 w-4" />
 									Unpublish
 								</DropdownMenuItem>
 								<DropdownMenuItem
-									onClick={() => handleMarkPublishedVersionAsFeatured.mutate(post.id)}
+									onClick={() =>
+										handleMarkPublishedVersionAsFeatured.mutate(post.id)
+									}
 								>
 									<Star className="mr-2 h-4 w-4" />
 									{post.publishedVersion.isFeatured

@@ -2,42 +2,67 @@
 
 import { withAuthCheck } from "@/lib/auth";
 import * as postsProxy from "@/proxies/posts";
-import * as postsVersionsProxy from "@/proxies/postsVersions";
 import { redirect } from "next/navigation";
-import { cache } from "react";
-import { unstable_cache } from "next/cache";
+import { revalidatePath, revalidateTag, unstable_cache } from "next/cache";
 
-export const getPosts = withAuthCheck(async (_, sort: postsProxy.SortOption = "url", direction: postsProxy.SortDirection = "asc") => {
-	return await postsProxy.getPosts(sort, direction);
+export const getPosts = withAuthCheck(
+	async (
+		_,
+		sort: postsProxy.SortOption = "url",
+		direction: postsProxy.SortDirection = "asc",
+	) => {
+		return await postsProxy.getPosts(sort, direction);
+	},
+);
+
+export const getPostById = withAuthCheck(async (_, postId: string) => {
+	const post = await postsProxy.getPostById(postId);
+	/* console.log("links", post?.latestVersion?.links); */
+	return post;
 });
 
-export const createPost = withAuthCheck(async () => {
-	const newPost = await postsProxy.createPost({
-		url: `new-post-${new Date().getTime()}`,
-	});
-
-	const newPostVersion = await postsVersionsProxy.createPostVersion({
-		postId: newPost.id,
-		url: newPost.url,
-		title: "New Post",
-		description: "New Post Description",
-		content: "New Post Content",
-		author: "Alwurts",
-		date: new Date(),
-		tags: [],
-	});
-
-	if (!newPostVersion) {
-		throw new Error("Failed to create post version");
-	}
-
-	await postsProxy.updatePost(newPost.id, {
-		latestVersionId: newPostVersion.postVersion,
-		url: newPost.url,
-	});
+export const createPost = withAuthCheck(async (_, type: "project" | "blog") => {
+	const newPost = await postsProxy.createPost(type);
 
 	redirect(`/editor/${newPost.id}`);
 });
+
+export const updatePost = withAuthCheck(async (_, formData: FormData) => {
+	const result = await postsProxy.updatePost(formData);
+	//revalidatePath(`/editor/${result.id}`);
+	revalidatePath("/editor");
+});
+
+export const publishLatestVersion = withAuthCheck(async (_, postId: string) => {
+	const result = await postsProxy.publishLatestVersion(postId);
+	revalidatePath("/editor");
+	revalidateTag("getPublishedPosts");
+	revalidateTag("getPublishedFeaturedPosts");
+	revalidateTag("getPublishedPostByUrl");
+	return result;
+});
+
+export const unpublishLatestVersion = withAuthCheck(
+	async (_, postId: string) => {
+		const result = await postsProxy.unpublishLatestVersion(postId);
+		revalidatePath("/editor");
+		revalidateTag("getPublishedPosts");
+		revalidateTag("getPublishedFeaturedPosts");
+		revalidateTag("getPublishedPostByUrl");
+		return result;
+	},
+);
+
+export const markPublishedVersionAsFeatured = withAuthCheck(
+	async (_, postId: string) => {
+		const result = await postsProxy.markPublishedVersionAsFeatured(postId);
+		revalidatePath("/editor");
+		revalidateTag("getPublishedPosts");
+		revalidateTag("getPublishedFeaturedPosts");
+		revalidateTag("getPublishedPostByUrl");
+		return result;
+	},
+);
 
 export const getPublishedPosts = unstable_cache(
 	postsProxy.getPublishedPosts,

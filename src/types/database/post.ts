@@ -1,6 +1,6 @@
-import type { InferInsertModel } from "drizzle-orm";
+import { InferInsertModel } from "drizzle-orm";
 import type { InferQueryModel } from "./inferDatabase";
-import type { posts, postTags } from "@/database/schema";
+import { posts, postVersions } from "@/database/schema/post";
 
 export type TPost = InferQueryModel<
 	"posts",
@@ -24,15 +24,3 @@ export type TPost = InferQueryModel<
 		};
 	}
 >;
-
-export type TCreatePost = Omit<
-	InferInsertModel<typeof posts>,
-	"id" | "createdAt" | "publishedAt" | "isPublished"
->;
-
-export type TUpdatePost = Omit<
-	InferInsertModel<typeof posts>,
-	"createdAt" | "publishedAt" | "isPublished"
-> & {
-	tags: InferInsertModel<typeof postTags>[];
-};

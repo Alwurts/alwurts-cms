@@ -1,15 +1,12 @@
-import { relations, sql } from "drizzle-orm";
+import { relations } from "drizzle-orm";
 import {
 	boolean,
 	date,
-	foreignKey,
-	index,
 	integer,
 	pgTable,
 	primaryKey,
 	text,
 	timestamp,
-	time,
 	uuid,
 	varchar,
 	jsonb,
@@ -22,7 +19,7 @@ export const postTypeEnum = pgEnum("post_type", ["project", "blog"]);
 
 export const posts = pgTable("posts", {
 	id: uuid("id").primaryKey().defaultRandom(),
-	type: postTypeEnum("type").default("project"),
+	type: postTypeEnum("type").notNull().default("project"),
 	url: varchar("url", { length: 255 }).notNull(),
 	latestVersionId: integer("latest_version_id"),
 	publishedVersionId: integer("published_version_id"),
