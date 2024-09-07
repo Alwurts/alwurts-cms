@@ -45,7 +45,7 @@ export const updatePost = async (formData: FormData) => {
 	const postFormData = Object.fromEntries(formData);
 	const postData = PostEditorFormSchema.parse(postFormData);
 
-	const { tags: tagsJson, ...postDataRest } = postData;
+	const { tags: tagsJson, type, ...postDataRest } = postData;
 
 	const post = await getPostById(postData.postId);
 	const previousLatestVersion = post?.latestVersion;
@@ -111,6 +111,7 @@ export const updatePost = async (formData: FormData) => {
 		.update(posts)
 		.set({
 			latestVersionId: newPostVersion.postVersion,
+			type: type,
 		})
 		.where(eq(posts.id, postDataRest.postId))
 		.returning();

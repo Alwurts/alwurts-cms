@@ -14,4 +14,5 @@ export const PostEditorFormSchema = z.object({
 	imageLargeDescription: z.string().optional(),
 	imageSmall: z.any().optional(),
 	imageSmallDescription: z.string().optional(),
+	type: z.enum(["project", "blog"]),
 });

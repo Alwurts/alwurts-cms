@@ -24,6 +24,13 @@ import LoadingButton from "@/components/ui/loading-button";
 import type { TPost } from "@/types/database/post";
 import { updatePost } from "@/server-actions/post";
 import { PostEditorFormSchema } from "@/zod/post";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 
 export default function Editor({
 	post,
@@ -44,11 +51,6 @@ export default function Editor({
 			});
 		},
 	});
-
-	console.log(
-		"date",
-		latestVersion?.date ? latestVersion.date.toISOString().split("T")[0] : "",
-	);
 
 	const form = useForm<z.infer<typeof PostEditorFormSchema>>({
 		resolver: zodResolver(PostEditorFormSchema),
@@ -72,6 +74,7 @@ export default function Editor({
 			imageLargeDescription: latestVersion?.imageLarge?.description || "",
 			imageSmall: undefined,
 			imageSmallDescription: latestVersion?.imageSmall?.description || "",
+			type: post.type,
 		},
 	});
 
@@ -134,6 +137,7 @@ export default function Editor({
 		if (values.links) {
 			formData.append("links", values.links);
 		}
+		formData.append("type", values.type);
 
 		savePostVersion.mutate(formData);
 	}
@@ -199,6 +203,38 @@ export default function Editor({
 									<FormLabel className="min-w-[100px]">URL</FormLabel>
 									<FormControl className="flex-1">
 										<Input placeholder="Post URL" {...field} />
+									</FormControl>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name="type"
+							render={({ field }) => (
+								<FormItem className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+									<FormLabel className="min-w-[100px]">Post Type</FormLabel>
+									<FormControl>
+										<Select
+											onValueChange={(value) => {
+												field.onChange(value);
+												toast({
+													title: "Post Type Changed",
+													description:
+														"The post type has been changed. This may affect how the post is displayed and managed. The change will be saved when you click the Save button.",
+													duration: 10000,
+												});
+											}}
+											value={field.value}
+										>
+											<SelectTrigger className="w-[180px]">
+												<SelectValue placeholder="Select post type" />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="project">Project</SelectItem>
+												<SelectItem value="blog">Blog</SelectItem>
+											</SelectContent>
+										</Select>
 									</FormControl>
 									<FormMessage />
 								</FormItem>
@@ -283,43 +319,6 @@ export default function Editor({
 								</FormItem>
 							)}
 						/>
-						{/* <FormItem className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-							<FormLabel className="min-w-[100px]">Post Type</FormLabel>
-							<AlertDialog>
-								<AlertDialogTrigger asChild>
-									<Select
-										value={currentPostType}
-										onValueChange={(value: "project" | "blog") =>
-											setCurrentPostType(value)
-										}
-									>
-										<SelectTrigger className="w-[180px]">
-											<SelectValue placeholder="Select post type" />
-										</SelectTrigger>
-										<SelectContent>
-											<SelectItem value="project">Project</SelectItem>
-											<SelectItem value="blog">Blog</SelectItem>
-										</SelectContent>
-									</Select>
-								</AlertDialogTrigger>
-								<AlertDialogContent>
-									<AlertDialogHeader>
-										<AlertDialogTitle>Are you sure?</AlertDialogTitle>
-										<AlertDialogDescription>
-											Changing the post type may affect how the post is
-											displayed and managed.
-										</AlertDialogDescription>
-									</AlertDialogHeader>
-									<AlertDialogFooter>
-										<AlertDialogCancel>Cancel</AlertDialogCancel>
-										<AlertDialogAction
-										>
-											Continue
-										</AlertDialogAction>
-									</AlertDialogFooter>
-								</AlertDialogContent>
-							</AlertDialog>
-						</FormItem> */}
 					</div>
 
 					{/* Images section */}
