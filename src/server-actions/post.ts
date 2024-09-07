@@ -36,7 +36,8 @@ export const updatePost = withAuthCheck(async (_, formData: FormData) => {
 export const publishLatestVersion = withAuthCheck(async (_, postId: string) => {
 	const result = await postsProxy.publishLatestVersion(postId);
 	revalidatePath("/editor");
-	revalidateTag("getPublishedPosts");
+	revalidateTag("getPublishedProjects");
+	revalidateTag("getPublishedBlogs");
 	revalidateTag("getPublishedFeaturedPosts");
 	revalidateTag("getPublishedPostByUrl");
 	return result;
@@ -46,7 +47,8 @@ export const unpublishLatestVersion = withAuthCheck(
 	async (_, postId: string) => {
 		const result = await postsProxy.unpublishLatestVersion(postId);
 		revalidatePath("/editor");
-		revalidateTag("getPublishedPosts");
+		revalidateTag("getPublishedProjects");
+		revalidateTag("getPublishedBlogs");
 		revalidateTag("getPublishedFeaturedPosts");
 		revalidateTag("getPublishedPostByUrl");
 		return result;
@@ -57,23 +59,16 @@ export const markPublishedVersionAsFeatured = withAuthCheck(
 	async (_, postId: string) => {
 		const result = await postsProxy.markPublishedVersionAsFeatured(postId);
 		revalidatePath("/editor");
-		revalidateTag("getPublishedPosts");
+		revalidateTag("getPublishedProjects");
+		revalidateTag("getPublishedBlogs");
 		revalidateTag("getPublishedFeaturedPosts");
 		revalidateTag("getPublishedPostByUrl");
 		return result;
 	},
 );
 
-export const getPublishedPosts = unstable_cache(
-	postsProxy.getPublishedPosts,
-	["getPublishedPosts"],
-	{
-		tags: ["getPublishedPosts"],
-	},
-);
-
 export const getPublishedFeaturedPosts = unstable_cache(
-	postsProxy.getPublishedFeaturedPosts,
+	postsProxy.getPublishedFeaturedProjects,
 	["getPublishedFeaturedPosts"],
 	{
 		tags: ["getPublishedFeaturedPosts"],
@@ -85,5 +80,21 @@ export const getPublishedPostByUrl = unstable_cache(
 	["getPublishedPostByUrl"],
 	{
 		tags: ["getPublishedPostByUrl"],
+	},
+);
+
+export const getPublishedProjects = unstable_cache(
+	postsProxy.getPublishedProjects,
+	["getPublishedProjects"],
+	{
+		tags: ["getPublishedProjects"],
+	},
+);
+
+export const getPublishedBlogs = unstable_cache(
+	postsProxy.getPublishedBlogs,
+	["getPublishedBlogs"],
+	{
+		tags: ["getPublishedBlogs"],
 	},
 );

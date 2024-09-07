@@ -269,7 +269,7 @@ export const getPosts = async (
 	return sortPosts(result, sort, direction);
 };
 
-export const getPublishedPosts = async () => {
+/* export const getPublishedPosts = async () => {
 	const result = await db.query.posts.findMany({
 		where: isNotNull(posts.publishedVersionId),
 		with: {
@@ -289,7 +289,7 @@ export const getPublishedPosts = async () => {
 		return new Date(b.date).getTime() - new Date(a.date).getTime();
 	});
 	return filteredPublishedPosts;
-};
+}; */
 
 export const getPublishedPostByUrl = async (url: string) => {
 	const result = await db.query.posts.findFirst({
@@ -307,7 +307,51 @@ export const getPublishedPostByUrl = async (url: string) => {
 	return result?.publishedVersion;
 };
 
-export const getPublishedFeaturedPosts = async () => {
-	const result = await getPublishedPosts();
+export const getPublishedFeaturedProjects = async () => {
+	const result = await getPublishedProjects();
 	return result.filter((post) => post.isFeatured);
+};
+
+export const getPublishedProjects = async () => {
+	const result = await db.query.posts.findMany({
+		where: and(isNotNull(posts.publishedVersionId), eq(posts.type, "project")),
+		with: {
+			publishedVersion: {
+				with: {
+					tags: true,
+					imageSmall: true,
+					imageLarge: true,
+				},
+			},
+		},
+	});
+	const publishedProjects = result
+		.map((post) => post.publishedVersion)
+		.filter((post): post is NonNullable<typeof post> => !!post);
+	publishedProjects.sort(
+		(a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+	);
+	return publishedProjects;
+};
+
+export const getPublishedBlogs = async () => {
+	const result = await db.query.posts.findMany({
+		where: and(isNotNull(posts.publishedVersionId), eq(posts.type, "blog")),
+		with: {
+			publishedVersion: {
+				with: {
+					tags: true,
+					imageSmall: true,
+					imageLarge: true,
+				},
+			},
+		},
+	});
+	const publishedBlogs = result
+		.map((post) => post.publishedVersion)
+		.filter((post): post is NonNullable<typeof post> => !!post);
+	publishedBlogs.sort(
+		(a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+	);
+	return publishedBlogs;
 };
