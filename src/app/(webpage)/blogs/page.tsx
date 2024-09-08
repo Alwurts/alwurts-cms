@@ -2,7 +2,7 @@ export const dynamic = "force-dynamic";
 
 import MainLoader from "@/components/skeleton/MainLoader";
 import { Suspense } from "react";
-import BlogPosts from "../components/PostList";
+import { PostsList } from "../components/PostsList";
 import { getPublishedBlogs } from "@/server-actions/post";
 
 export default async function Blog() {
@@ -15,7 +15,7 @@ export default async function Blog() {
 					<h2 className="text-6xl font-bold">Blog</h2>
 				</div>
 				<Suspense fallback={<MainLoader />}>
-					<BlogPosts posts={posts} postType="blog" />
+					<PostsList posts={posts} postType="blog" />
 				</Suspense>
 			</section>
 		</div>

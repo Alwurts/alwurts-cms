@@ -2,7 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { TPost } from "@/types/database/post";
 
-export default async function PostsLists({
+export function PostsList({
 	posts,
 	postType,
 }: {

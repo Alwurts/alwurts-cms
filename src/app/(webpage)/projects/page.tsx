@@ -2,8 +2,8 @@ export const dynamic = "force-dynamic";
 
 import MainLoader from "@/components/skeleton/MainLoader";
 import { Suspense } from "react";
-import ProjectPosts from "../components/PostList";
 import { getPublishedProjects } from "@/server-actions/post";
+import { PostsList } from "../components/PostsList";
 
 export default async function Projects() {
 	const posts = await getPublishedProjects();
@@ -15,7 +15,7 @@ export default async function Projects() {
 					<h2 className="text-6xl font-bold">Projects</h2>
 				</div>
 				<Suspense fallback={<MainLoader />}>
-					<ProjectPosts posts={posts} postType="project" />
+					<PostsList posts={posts} postType="project" />
 				</Suspense>
 			</section>
 		</div>
